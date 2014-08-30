@@ -1,0 +1,19 @@
+# OS specific
+.DS_Store
+
+# Build files
+*.class
+*.tokens
+nodewebkitwrapper*.java
+
+# Output files
+*_wrap.cc
+*_wrap.h
+*.png
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# Test files
+test
