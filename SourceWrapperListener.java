@@ -90,10 +90,10 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     p("Persistent<Function> " + className + "::constructor;");
     p("");
     p(className + "::" + className + "() : ObjectWrap(), " + className.toLowerCase() + "(new " + ns + className + "()) {};");
-    p(className + "::" + className + "(" + ns + className + "* o) : ObjectWrap(), " + className.toLowerCase() + "(o)) {};");
+    p(className + "::" + className + "(" + ns + className + "* o) : ObjectWrap(), " + className.toLowerCase() + "(o) {};");
     p(className + "::~" + className + "() { delete " + className.toLowerCase() + "; };");
     p("");
-    p("Handle<Value> BasicGenre::New(const Arguments& args) {");
+    p("Handle<Value> " + className + "::New(const Arguments& args) {");
     p("  Isolate* isolate = Isolate::GetCurrent();");
     p("  HandleScope scope(isolate);");
     p("");
