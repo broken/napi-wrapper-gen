@@ -38,13 +38,13 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
 
   private String wrap(nodewebkitwrapperParser.TypeContext type, String name) {
     if (type.typeName().getText().equals("int")) {
-      return "Number::New(" + name + ")";
+      return "NanNew<v8::Number>(" + name + ")";
     } else if (type.typeName().getText().startsWith("string")) {
-      return "String::New(" + name + ".c_str(), " + name + ".length())";
+      return "NanNew<v8::String>(" + name + ".c_str(), " + name + ".length())";
     } else if (type.typeName().getText().equals("bool")) {
-      return "Boolean::New(" + name + ")";
+      return "NanNew<v8::Boolean>(" + name + ")";
     } else if (type.typeName().getText().equals("time_t")) {
-      return "Number::New(" + name + "* 1000)";
+      return "NanNew<v8::Number>(" + name + "* 1000)";
     } else {
       return "";
     }
@@ -90,52 +90,49 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     className = ctx.Identifier().toString();
     p("#include <iostream>");
     p("#include <node.h>");
+    p("#include <nan.h>");
     p("#include \"" + className + ".h\"");
     p("#include \"" + className + "_wrap.h\"");
     p("");
-    p("using namespace v8;");
-    p("");
-    p("Persistent<Function> " + className + "::constructor;");
+    p("v8::Persistent<v8::Function> " + className + "::constructor;");
     p("");
     p(className + "::" + className + "() : ObjectWrap(), " + className.toLowerCase() + "(new " + ns + className + "()) {};");
     p(className + "::" + className + "(" + ns + className + "* o) : ObjectWrap(), " + className.toLowerCase() + "(o) {};");
     p(className + "::~" + className + "() { delete " + className.toLowerCase() + "; };");
     p("");
-    p("Handle<Value> " + className + "::New(const Arguments& args) {");
-    p("  Isolate* isolate = Isolate::GetCurrent();");
-    p("  HandleScope scope(isolate);");
+    p("NAN_METHOD(" + className + "::New) {");
+    p("  NanScope();");
     p("");
     p("  " + className + "* obj = new " + className + "();");
     p("  obj->Wrap(args.This());");
     p("");
-    p("  return args.This();");
+    p("  NanReturnValue(args.This());");
     p("}");
     p("");
   }
 
   @Override public void exitCppClass(@NotNull nodewebkitwrapperParser.CppClassContext ctx) {
     p("");
-    p("void " + className + "::Init(Handle<Object> exports) {");
-    p("  Isolate* isolate = Isolate::GetCurrent();");
+    p("void " + className + "::Init(v8::Handle<v8::Object> exports) {");
+    p("  NanScope();");
     p("");
     p("  // Prepare constructor template");
-    p("  Local<FunctionTemplate> tpl = FunctionTemplate::New(New);");
-    p("  tpl->SetClassName(String::NewSymbol(\"" + className + "\"));");
+    p("  v8::Local<v8::FunctionTemplate> tpl = NanNew<v8::FunctionTemplate>(New);");
+    p("  tpl->SetClassName(NanNew<v8::String>(\"" + className + "\"));");
     p("  tpl->InstanceTemplate()->SetInternalFieldCount(1);");
     p("");
     for (String staticMethod : staticMethods) {
-      p("  tpl->Set(String::NewSymbol(\"" + staticMethod + "\"),");
-      p("      FunctionTemplate::New(" + staticMethod + ")->GetFunction());");
+      p("  tpl->Set(NanNew<v8::String>(\"" + staticMethod + "\"),");
+      p("      NanNew<v8::FunctionTemplate>(" + staticMethod + ")->GetFunction());");
     }
     p("");
     p("  // Prototype");
     for (String method : methods) {
-      p("  tpl->PrototypeTemplate()->Set(String::NewSymbol(\"" + method + "\"),");
-      p("      FunctionTemplate::New(" + method + ")->GetFunction());");
+      p("  NanSetPrototypeTemplate(tpl, \"" + method + "\", NanNew<v8::String>(\"" + method + " prop?\"));");
     }
     p("");
-    p("  constructor = Persistent<Function>::New(isolate, tpl->GetFunction());");
-    p("  exports->Set(String::NewSymbol(\"" + className + "\"), constructor);");
+    p("  NanAssignPersistent<v8::Function>(constructor, tpl->GetFunction());");
+    p("  exports->Set(NanNew<v8::String>(\"" + className + "\"), tpl->GetFunction());");
     p("}");
   }
 
@@ -151,18 +148,16 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     } else {
       methods.add(methodName);
     }
-    p("Handle<Value> " + className + "::" + methodName + "(const Arguments& args) {");
-    p("  Isolate* isolate = Isolate::GetCurrent();");
-    p("  HandleScope scope(isolate);");
+    p("NAN_METHOD(" + className + "::" + methodName + ") {");
+    p("  NanScope();");
     p("");
     if (!isStatic)
       p("  " + className + "* obj = ObjectWrap::Unwrap<" + className + ">(args.This());");
     if (isInstance) {
       p("  " + ns + className + "* " + className.toLowerCase() + " =");
       p("      " + ns + className + "::" + methodName + "(" + paramList(ctx.parameterList()) + ");");
-      p("  const unsigned argc = 0;");
-      p("  Handle<Value> argv[argc] = { };");
-      p("  Local<Object> instance = constructor->NewInstance(argc, argv);");
+      p("  v8::Local<v8::Function> cons = NanNew<v8::Function>(constructor);");
+      p("  v8::Local<v8::Object> instance = cons->NewInstance();");
       p("");
       p("  " + className + "* obj = ObjectWrap::Unwrap<" + className + ">(instance);");
       p("  obj->" + className.toLowerCase() + " = " + className.toLowerCase() + ";");
@@ -173,11 +168,11 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     }
     p("");
     if (isVoid) {
-      p("  return Undefined();");
+      p("  NanReturnUndefined();");
     } else if (isInstance) {
-      p("  return scope.Close(instance);");
+      p("  NanReturnValue(instance);");
     } else {
-      p("  return scope.Close(" + wrap(ctx.type(), "result") + ");");
+      p("  NanReturnValue(" + wrap(ctx.type(), "result") + ");");
     }
     p("}");
   }

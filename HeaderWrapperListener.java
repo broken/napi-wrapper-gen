@@ -46,19 +46,19 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     p("#define " + className + "_wrap_h");
     p("");
     p("#include <node.h>");
+    p("#include <nan.h>");
     p("#include \"" + className + ".h\"");
     p("");
     p("class " + className + " : public node::ObjectWrap {");
     p(" public:");
     p("  static void Init(v8::Handle<v8::Object> exports);");
-    p("  static v8::Handle<v8::Value> NewInstance(const v8::Arguments& args);");
     p("");
     p(" private:");
     p("  " + className + "();");
     p("  explicit " + className + "(" + ns + className + "* " + className.toLowerCase() + ");");
     p("  ~" + className + "();");
     p("");
-    p("  static v8::Handle<v8::Value> New(const v8::Arguments& args);");
+    p("  static NAN_METHOD(New);");
     p("");
   }
 
@@ -76,7 +76,7 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     boolean isInstance = ctx.type().getText().equals(className + "*");
     if (isStatic && !isInstance) return;  // skip
 
-    p("  static v8::Handle<v8::Value> " + ctx.Identifier() + "(const v8::Arguments& args);");
+    p("  static NAN_METHOD(" + ctx.Identifier() + ");");
   }
 
 
