@@ -36,30 +36,38 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     ns = sb.toString();
   }
 
-  private String wrap(String type, String name) {
-    if (type.equals("int")) {
+  private String wrap(nodewebkitwrapperParser.TypeContext type, String name) {
+    if (type.typeName().getText().equals("int")) {
       return "Number::New(" + name + ")";
-    } else if (type.equals("string")) {
+    } else if (type.typeName().getText().startsWith("string")) {
       return "String::New(" + name + ".c_str(), " + name + ".length())";
+    } else if (type.typeName().getText().equals("bool")) {
+      return "Boolean::New(" + name + ")";
+    } else if (type.typeName().getText().equals("time_t")) {
+      return "Number::New(" + name + "* 1000)";
     } else {
       return "";
     }
   }
 
-  private String unwrap(String type, String name) {
-    if (type.equals("int")) {
+  private String unwrap(nodewebkitwrapperParser.TypeContext type, String name) {
+    if (type.typeName().getText().equals("int")) {
       return name + "->Uint32Value()";
-    } else if (type.equals("string")) {
+    } else if (type.typeName().getText().startsWith("string&")) {
       return "*v8::String::Utf8Value(" + name + "->ToString())";
+    } else if (type.typeName().getText().equals("bool")) {
+      return name + "->BooleanValue()";
+    } else if (type.typeName().getText().equals("time_t")) {
+      return name + "->Uint32Value() / 1000";
     } else {
-      return "";
+      return type.typeName().getText();
     }
   }
 
   private String paramList(nodewebkitwrapperParser.ParameterListContext ctx) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < ctx.parameter().size(); ++i) {
-      sb.append(unwrap(ctx.parameter().get(i).type().getText(), "args[" + i + "]"));
+      sb.append(unwrap(ctx.parameter().get(i).type(), "args[" + i + "]"));
       if (i + 1 < ctx.parameter().size()) {
         sb.append(", ");
       }
@@ -134,7 +142,7 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
   @Override public void enterMethod(@NotNull nodewebkitwrapperParser.MethodContext ctx) {
     String methodName = ctx.Identifier().toString();
     boolean isStatic = ctx.STATIC() != null;
-    boolean isVoid = ctx.type().VOID() != null;
+    boolean isVoid = ctx.type().typeName().VOID() != null;
     boolean isInstance = ctx.type().getText().equals(className + "*");
     if (isStatic && !isInstance) return;  // skip
     p("");
@@ -160,7 +168,7 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
       p("  obj->" + className.toLowerCase() + " = " + className.toLowerCase() + ";");
     } else {
       if (!isVoid)
-        System.out.print("  " + ctx.type().getText() + " result =");
+        System.out.print("  " + (ctx.type().CONST() != null ? "const " : "") + ctx.type().typeName().getText() + " result =");
       p("  obj->" + className.toLowerCase() + "->" + methodName + "(" + paramList(ctx.parameterList()) + ");");
     }
     p("");
@@ -169,7 +177,7 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     } else if (isInstance) {
       p("  return scope.Close(instance);");
     } else {
-      p("  return scope.Close(" + wrap(ctx.type().getText(), "result") + ");");
+      p("  return scope.Close(" + wrap(ctx.type(), "result") + ");");
     }
     p("}");
   }

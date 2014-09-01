@@ -34,7 +34,8 @@ parameter: type Identifier;
 
 cppClass: CLASS Identifier '{' classBlock '}' SEMICOLON;
 
-type: CONST? (INT | BOOL | STRING | VOID | VECTOR | Identifier) Modifier?;
+type: CONST? typeName Modifier?;
+typeName: VOID | Identifier;
 
 COMMA: ',' -> skip;
 LPAREN: '(';
@@ -51,10 +52,6 @@ STATIC: 'static' ;
 OPEQ: 'operator=' ;
 
 VOID: 'void';
-INT: 'int';
-BOOL: 'bool';
-STRING: 'string';
-VECTOR: 'vector';
 
 STAR: '*';
 AMPERSAND: '&';
