@@ -52,6 +52,7 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     p("class " + className + " : public node::ObjectWrap {");
     p(" public:");
     p("  static void Init(v8::Handle<v8::Object> exports);");
+    p("  static NAN_METHOD(NewInstance);");
     p("");
     p(" private:");
     p("  " + className + "();");
@@ -59,6 +60,8 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     p("  ~" + className + "();");
     p("");
     p("  static NAN_METHOD(New);");
+    p("");
+    p("  " + ns + className + "* getNwcpValue() const { return " + className.toLowerCase() + "; }");
     p("");
   }
 
