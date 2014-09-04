@@ -27,7 +27,7 @@ constructor: EXPLICIT? Identifier parameterList SEMICOLON;
 destructor: '~' Identifier LPAREN RPAREN SEMICOLON;
 method: STATIC? type Identifier parameterList CONST? (block | SEMICOLON);
 friend: FRIEND Identifier SEMICOLON;
-equalsMethod: VOID OPEQ parameterList ;
+equalsMethod: type OPEQ parameterList ;
 
 parameterList: LPAREN (parameter (parameter)*)? RPAREN;
 parameter: type Identifier;
@@ -37,8 +37,7 @@ cppClass: CLASS Identifier LCBRACE classBlock RCBRACE SEMICOLON;
 block: LCBRACE innerBlock RCBRACE;
 innerBlock: (Identifier | ';' | block | type | STATIC) innerBlock;
 
-type: CONST? typeName Modifier?;
-typeName: VOID | Identifier;
+type: CONST? Identifier Modifier?;
 
 COMMA: ',' -> skip;
 LPAREN: '(';
@@ -55,8 +54,6 @@ CONST: 'const' ;
 EXPLICIT: 'explicit' ;
 STATIC: 'static' ;
 OPEQ: 'operator=' ;
-
-VOID: 'void';
 
 STAR: '*';
 AMPERSAND: '&';
