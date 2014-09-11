@@ -1,5 +1,7 @@
 public class CppType {
   public boolean isVoid;
+  public boolean isSet;
+
   public boolean isConst;
   public boolean isPointer = false;
   public boolean isPointerToPointer = false;
@@ -10,6 +12,16 @@ public class CppType {
     isConst = ctx.CONST() != null;
     name = ctx.Identifier().toString();
     isVoid = name.equals("void");
+    isSet = name.startsWith("set<");
+  }
+
+  public boolean isUnknownType(CppClass c) {
+    return !name.equals("int") &&
+           !name.startsWith("string") &&
+           !name.equals("bool") &&
+           !name.equals("time_t") &&
+           !name.equals("void") &&
+           !name.startsWith(c.name);
   }
 
   public String unwrap(String var) {

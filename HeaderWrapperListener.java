@@ -7,79 +7,72 @@ import org.antlr.v4.runtime.misc.NotNull;
 
 public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
   nodewebkitwrapperParser parser;
-  String className;
-  String ns;
-  Stack<String> namespaces;
+  CppClass cppClass;
+  CppNamespace cppNamespace = new CppNamespace();
 
   public HeaderWrapperListener(nodewebkitwrapperParser p) {
     parser = p;
-    ns = "";
-    namespaces = new Stack<String>();
   }
 
   private void p(String s) {
     System.out.println(s);
   }
 
-  private void setNamespace() {
-    Iterator<String> it = namespaces.iterator();
-    StringBuilder sb = new StringBuilder();
-    while (it.hasNext()) {
-        sb.append(it.next()).append("::");
-    }
-    ns = sb.toString();
-  }
-
   @Override public void enterNamespace(@NotNull nodewebkitwrapperParser.NamespaceContext ctx) {
-    namespaces.push(ctx.Identifier().toString());
-    setNamespace();
+    cppNamespace.push(ctx.Identifier().toString());
   }
 
   @Override public void exitNamespace(@NotNull nodewebkitwrapperParser.NamespaceContext ctx) {
-    namespaces.pop();
-    setNamespace();
+    cppNamespace.pop();
   }
 
   @Override public void enterCppClass(@NotNull nodewebkitwrapperParser.CppClassContext ctx) {
-    className = ctx.Identifier().toString();
-    p("#ifndef " + className + "_wrap_h");
-    p("#define " + className + "_wrap_h");
+    cppClass = new CppClass();
+    cppClass.name = ctx.Identifier().toString();
+  }
+
+  @Override public void exitCppClass(@NotNull nodewebkitwrapperParser.CppClassContext ctx) {
+    p("#ifndef " + cppClass.name + "_wrap_h");
+    p("#define " + cppClass.name + "_wrap_h");
     p("");
     p("#include <node.h>");
     p("#include <nan.h>");
-    p("#include \"" + className + ".h\"");
+    p("#include \"" + cppClass.name + ".h\"");
     p("");
-    p("class " + className + " : public node::ObjectWrap {");
+    p("class " + cppClass.name + " : public node::ObjectWrap {");
     p(" public:");
     p("  static void Init(v8::Handle<v8::Object> exports);");
     p("  static NAN_METHOD(NewInstance);");
     p("");
     p(" private:");
-    p("  " + className + "();");
-    p("  explicit " + className + "(" + ns + className + "* " + className.toLowerCase() + ");");
-    p("  ~" + className + "();");
+    p("  " + cppClass.name + "();");
+    p("  explicit " + cppClass.name + "(" + cppNamespace + cppClass.name + "* " + cppClass.name.toLowerCase() + ");");
+    p("  ~" + cppClass.name + "();");
     p("");
     p("  static NAN_METHOD(New);");
     p("");
-    p("  " + ns + className + "* getNwcpValue() const { return " + className.toLowerCase() + "; }");
+    p("  " + cppNamespace + cppClass.name + "* getNwcpValue() const { return " + cppClass.name.toLowerCase() + "; }");
     p("");
-  }
-
-  @Override public void exitCppClass(@NotNull nodewebkitwrapperParser.CppClassContext ctx) {
+    for (CppMethod m : cppClass.methods) {
+      if (m.isStatic && !m.isInstanceOf(cppClass)) continue;  // skip
+      if (m.returnType.isUnknownType(cppClass)) continue;
+      boolean cannotHandleArg = false;
+      for (CppType t : m.args) {
+        cannotHandleArg |= t.isUnknownType(cppClass);
+      }
+      if (cannotHandleArg) continue;
+      p("  static NAN_METHOD(" + m.name + ");");
+    }
     p("");
     p("  static v8::Persistent<v8::Function> constructor;");
-    p("  " + ns + className + "* " + className.toLowerCase() + ";");
+    p("  " + cppNamespace + cppClass.name + "* " + cppClass.name.toLowerCase() + ";");
     p("};");
     p("");
     p("#endif");
   }
 
   @Override public void enterMethod(@NotNull nodewebkitwrapperParser.MethodContext ctx) {
-    boolean isStatic = ctx.STATIC() != null;
-    boolean isInstance = ctx.type().getText().equals(className + "*");
-    if (isStatic && !isInstance) return;  // skip
-
-    p("  static NAN_METHOD(" + ctx.Identifier() + ");");
+    cppClass.methods.add(new CppMethod(ctx));
   }
 
 

@@ -4,6 +4,7 @@ import java.util.List;
 public class CppMethod {
   public boolean isStatic = false;
   public boolean isConst = false;
+  public boolean isClassType;
   public CppType returnType;
   public String name;
   public List<CppType> args = new ArrayList<CppType>();
@@ -16,5 +17,14 @@ public class CppMethod {
     for (nodewebkitwrapperParser.ParameterContext p : ctx.parameterList().parameter()) {
       args.add(new CppType(p.type()));
     }
+
+    isClassType = !returnType.name.equals("int")
+          && !returnType.name.startsWith("string")
+          && !returnType.name.equals("bool")
+          && !returnType.name.equals("time_t");
+  }
+
+  public boolean isInstanceOf(CppClass cppClass) {
+    return returnType.name.equals(cppClass.name + "*");
   }
 }
