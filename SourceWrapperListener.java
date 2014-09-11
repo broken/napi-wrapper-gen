@@ -1,3 +1,5 @@
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
@@ -8,16 +10,31 @@ import org.antlr.v4.runtime.misc.NotNull;
 
 public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
   nodewebkitwrapperParser parser;
-  CppClass cppClass;
+  CppClass cppClass = new CppClass();
   CppNamespace cppNamespace = new CppNamespace();
+  OutputStream os;
 
   public SourceWrapperListener(nodewebkitwrapperParser p) {
     parser = p;
-    cppClass = new CppClass();
+    os = System.out;
+  }
+
+  public SourceWrapperListener(nodewebkitwrapperParser p, OutputStream out) {
+    parser = p;
+    os = out;
+  }
+
+  private void p(String s, boolean nl) {
+    try {
+      os.write(s.getBytes());
+      if (nl) os.write("\n".getBytes());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private void p(String s) {
-    System.out.println(s);
+    p(s, true);
   }
 
   private String paramList(List<CppType> args) {
@@ -141,7 +158,7 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
         p("  obj->" + cppClass.name.toLowerCase() + " = " + cppClass.name.toLowerCase() + ";");
       } else {
         if (!m.returnType.isVoid)
-          System.out.print("  " + (m.returnType.isConst ? "const " : "") + (m.isClassType ? cppNamespace : "") + m.returnType.name + " result =");
+          p("  " + (m.returnType.isConst ? "const " : "") + (m.isClassType ? cppNamespace : "") + m.returnType.name + " result =", false);
         p("  obj->" + cppClass.name.toLowerCase() + "->" + m.name + "(" + paramList(m.args) + ");");
       }
       p("");

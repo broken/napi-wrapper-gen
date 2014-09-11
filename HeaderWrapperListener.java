@@ -1,3 +1,5 @@
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Stack;
 
@@ -9,13 +11,29 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
   nodewebkitwrapperParser parser;
   CppClass cppClass;
   CppNamespace cppNamespace = new CppNamespace();
+  OutputStream os;
 
   public HeaderWrapperListener(nodewebkitwrapperParser p) {
     parser = p;
+    os = System.out;
+  }
+
+  public HeaderWrapperListener(nodewebkitwrapperParser p, OutputStream out) {
+    parser = p;
+    os = out;
+  }
+
+  private void p(String s, boolean nl) {
+    try {
+      os.write(s.getBytes());
+      if (nl) os.write("\n".getBytes());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private void p(String s) {
-    System.out.println(s);
+    p(s, true);
   }
 
   @Override public void enterNamespace(@NotNull nodewebkitwrapperParser.NamespaceContext ctx) {

@@ -21,13 +21,13 @@ usingDeclaration: USING NAMESPACE Identifier SEMICOLON;
 
 classBlock: publicBlock* ;
 
-publicBlock: constructor | destructor | method | friend | equalsMethod ;
+publicBlock: constructor | destructor | method | friend | opMethod ;
 
 constructor: EXPLICIT? Identifier parameterList SEMICOLON;
 destructor: '~' Identifier LPAREN RPAREN SEMICOLON;
 method: STATIC? type Identifier parameterList CONST? (block | SEMICOLON);
 friend: FRIEND Identifier SEMICOLON;
-equalsMethod: type OPEQ parameterList ;
+opMethod: type ( OPEQ | OPLT | OPGT ) parameterList CONST? SEMICOLON ;
 
 parameterList: LPAREN (parameter (parameter)*)? RPAREN;
 parameter: type Identifier;
@@ -54,6 +54,8 @@ CONST: 'const' ;
 EXPLICIT: 'explicit' ;
 STATIC: 'static' ;
 OPEQ: 'operator=' ;
+OPLT: 'operator<' ;
+OPGT: 'operator>' ;
 
 STAR: '*';
 AMPERSAND: '&';
