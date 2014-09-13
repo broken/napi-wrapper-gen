@@ -72,7 +72,6 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     p("  " + cppNamespace + cppClass.name + "* getNwcpValue() const { return " + cppClass.name.toLowerCase() + "; }");
     p("");
     for (CppMethod m : cppClass.methods) {
-      if (m.isStatic && !m.isInstanceOf(cppClass)) continue;  // skip
       if (m.returnType.isUnknownType(cppClass)) continue;
       boolean cannotHandleArg = false;
       for (CppType t : m.args) {

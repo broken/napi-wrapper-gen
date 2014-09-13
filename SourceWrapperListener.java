@@ -40,7 +40,7 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
   private String paramList(List<CppType> args) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < args.size(); ++i) {
-      sb.append(args.get(i).unwrap("args[" + i + "]"));
+      sb.append("a" + i);
       if (i + 1 < args.size()) {
         sb.append(", ");
       }
@@ -58,7 +58,6 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
   }
 
   public boolean skipMethod(CppMethod m) {
-    if (m.isStatic && !m.isInstanceOf(cppClass)) return true;
     if (m.returnType.isUnknownType(cppClass)) return true;
     boolean cannotHandleArg = false;
     for (CppType t : m.args) {
@@ -126,7 +125,6 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     p("");
     for (CppMethod m : cppClass.methods) {
       if (skipMethod(m) || !m.isStatic) continue;
-      if (m.isClassType && !m.isInstanceOf(cppClass)) continue;
       p("  NanSetTemplate(tpl, \"" + m.name + "\", NanNew<v8::FunctionTemplate>(" + m.name + ")->GetFunction());");
     }
     p("");
@@ -148,6 +146,9 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
       p("");
       if (!m.isStatic)
         p("  " + cppClass.name + "* obj = ObjectWrap::Unwrap<" + cppClass.name + ">(args.This());");
+      for (int i = 0; i < m.args.size(); ++i) {
+        p(m.args.get(i).unwrap("args[" + i + "]", "a" + i, "  ", cppNamespace.toString(), cppClass));
+      }
       if (m.isInstanceOf(cppClass)) {
         p("  " + cppNamespace + cppClass.name + "* " + cppClass.name.toLowerCase() + " =");
         p("      " + cppNamespace + cppClass.name + "::" + m.name + "(" + paramList(m.args) + ");");
@@ -156,9 +157,16 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
         p("");
         p("  " + cppClass.name + "* obj = ObjectWrap::Unwrap<" + cppClass.name + ">(instance);");
         p("  obj->" + cppClass.name.toLowerCase() + " = " + cppClass.name.toLowerCase() + ";");
+      } else if (m.returnType.name.equals("ResultSetIterator<" + cppClass.name + ">*")) {
+        p("  dogatech::ResultSetIterator<" + cppNamespace + cppClass.name + ">* result =");
+        p("      " + cppNamespace + cppClass.name + "::" + m.name + "(" + paramList(m.args) + ");");
+      } else if (m.returnType.name.equals("vector<" + cppClass.name + "*>&") ||
+            m.returnType.name.equals("vector<" + cppClass.name + "*>")) {
+        p("  " + (m.returnType.isConst ? "const " : "") + "vector<" + cppNamespace + cppClass.name + "*> result =", false);
+        p("  obj->" + cppClass.name.toLowerCase() + "->" + m.name + "(" + paramList(m.args) + ");");
       } else {
         if (!m.returnType.isVoid)
-          p("  " + (m.returnType.isConst ? "const " : "") + (m.isClassType ? cppNamespace : "") + m.returnType.name + " result =", false);
+          p("  " + (m.returnType.isConst ? "const " : "") + (m.isClassType ? cppNamespace : "") + (m.returnType.isReference ? m.returnType.name.substring(0, m.returnType.name.length()-1) : m.returnType.name) + " result =", false);
         p("  obj->" + cppClass.name.toLowerCase() + "->" + m.name + "(" + paramList(m.args) + ");");
       }
       p("");
@@ -171,6 +179,29 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
         p("  " + m.returnType.name + " r = " + typeName + ".NewInstance();");
         p("  r->" + typeName.toLowerCase() + " = result;");
         p("  NanReturnValue(r);");
+      } else if (m.returnType.name.equals("vector<" + cppClass.name + "*>&") ||
+            m.returnType.name.equals("vector<" + cppClass.name + "*>")) {
+        p("  v8::Handle<v8::Array> a = NanNew<v8::Array>((int) result.size());");
+        p("  for (int i = 0; i < (int) result.size(); i++) {");
+        p("    v8::Local<v8::Function> cons = NanNew<v8::Function>(constructor);");
+        p("    v8::Local<v8::Object> instance = cons->NewInstance();");
+        p("    " + cppClass.name + "* o = ObjectWrap::Unwrap<" + cppClass.name + ">(instance);");
+        p("    o->" + cppClass.name.toLowerCase() + " = result[i];");
+        p("    a->Set(NanNew<v8::Number>(i), instance);");
+        p("  }");
+        p("  NanReturnValue(a);");
+      } else if (m.returnType.name.equals("ResultSetIterator<" + cppClass.name + ">*")) {
+        p("  vector<" + cppNamespace + cppClass.name + "*>* v = result->toVector();");
+        p("  v8::Handle<v8::Array> a = NanNew<v8::Array>((int) v->size());");
+        p("  for (int i = 0; i < (int) v->size(); i++) {");
+        p("    v8::Local<v8::Function> cons = NanNew<v8::Function>(constructor);");
+        p("    v8::Local<v8::Object> instance = cons->NewInstance();");
+        p("    " + cppClass.name + "* o = ObjectWrap::Unwrap<" + cppClass.name + ">(instance);");
+        p("    o->" + cppClass.name.toLowerCase() + " = (*v)[i];");
+        p("    a->Set(NanNew<v8::Number>(i), instance);");
+        p("  }");
+        p("  delete v;");
+        p("  NanReturnValue(a);");
       } else {
         p("  NanReturnValue(" + m.returnType.wrap("result") + ");");
       }

@@ -20,6 +20,8 @@ public class CppMethod {
 
     isClassType = !returnType.name.equals("int")
           && !returnType.name.startsWith("string")
+          && !returnType.name.startsWith("vector")
+          && !returnType.name.startsWith("ResultSetIterator")
           && !returnType.name.equals("bool")
           && !returnType.name.equals("time_t");
   }

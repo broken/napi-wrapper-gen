@@ -1,8 +1,9 @@
 public class CppType {
   public boolean isVoid;
   public boolean isSet;
+  public boolean isVector;
 
-  public boolean isConst;
+  public boolean isConst = false;
   public boolean isPointer = false;
   public boolean isPointerToPointer = false;
   public boolean isReference = false;
@@ -13,6 +14,19 @@ public class CppType {
     name = ctx.Identifier().toString();
     isVoid = name.equals("void");
     isSet = name.startsWith("set<");
+    isVector = name.startsWith("vector<");
+    isPointer = name.charAt(name.length() - 1) == '*';
+    isReference = name.charAt(name.length() - 1) == '&';
+  }
+
+  public CppType(String type) {
+    name = type;
+    isConst = name.startsWith("const");
+    isVoid = name.equals("void");
+    isSet = name.startsWith("set<");
+    isVector = name.startsWith("vector<");
+    isPointer = name.charAt(name.length() - 1) == '*';
+    isReference = name.charAt(name.length() - 1) == '&';
   }
 
   public boolean isUnknownType(CppClass c) {
@@ -21,22 +35,35 @@ public class CppType {
            !name.equals("bool") &&
            !name.equals("time_t") &&
            !name.equals("void") &&
+           !name.equals("vector<" + c.name + "*>&") &&
+           !name.equals("ResultSetIterator<" + c.name + ">*") &&
            !name.startsWith(c.name);
   }
 
-  public String unwrap(String var) {
+  public String unwrap(String from, String to, String sp, String namespace, CppClass cppClass) {
     if (name.equals("int")) {
-      return var + "->Uint32Value()";
-    } else if (name.startsWith("string&")) {
-      return "*v8::String::Utf8Value(" + var + "->ToString())";
+      return sp + "int " + to + "(" + from + "->Uint32Value());";
+    } else if (name.equals("string&")) {
+      return sp + "string " + to + "(" + "*v8::String::Utf8Value(" + from + "->ToString()));";
     } else if (name.equals("bool")) {
-      return var + "->BooleanValue()";
+      return sp + "bool " + to + "(" + from + "->BooleanValue());";
     } else if (name.equals("time_t")) {
-      return var + "->Uint32Value() / 1000";
+      return sp + "time_t " + to + "(" + from + "->Uint32Value() / 1000);";
+    } else if (name.startsWith("vector<" + cppClass.name + "*>")) {
+      StringBuilder sb = new StringBuilder();
+      sb.append(sp + "v8::Local<v8::Array> array = v8::Local<v8::Array>::Cast(" + from + ");\n");
+      sb.append(sp + "vector<" + namespace + cppClass.name + "*> " + to + ";\n");
+      sb.append(sp + "for (int i = 0; i < array->Length(); ++i) {\n");
+      CppType generic = new CppType(name.substring(7, name.lastIndexOf(">")));
+      sb.append(sp + "  " + "v8::Local<v8::Value> tmp = array->Get(i);\n");
+      sb.append(generic.unwrap("tmp", "x", sp + "  ", namespace, cppClass) + "\n");
+      sb.append(sp + "  " + to + ".push_back(x);\n");
+      sb.append(sp + "}");
+      return sb.toString();
+    } else if (name.endsWith("*")) {
+      return sp + namespace + name + " " + to + "(node::ObjectWrap::Unwrap<" + name.replaceAll("(\\*|&)", "") + ">(" + from + "->ToObject())->getNwcpValue())" + (isReference ? "*" : "") + ";";
     } else {
-      boolean ptr = name.charAt(name.length() - 1) == '*';
-      boolean ref = name.charAt(name.length() - 1) == '&';
-      return "(node::ObjectWrap::Unwrap<" + name.replaceAll("(\\*|&)", "") + ">(" + var + "->ToObject())->getNwcpValue())" + (ref ? "*" : "");
+      return sp + namespace + name.replaceAll("(\\*|&)", "") + " " + to + "(node::ObjectWrap::Unwrap<" + name.replaceAll("(\\*|&)", "") + ">(" + from + "->ToObject())->getNwcpValue())" + (isReference ? "*" : "") + ";";
     }
   }
 
