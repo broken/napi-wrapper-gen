@@ -30,14 +30,19 @@ public class CppType {
   }
 
   public boolean isUnknownType(CppClass c) {
-    return !name.equals("int") &&
+    return (!name.equals("int") &&
            !name.startsWith("string") &&
            !name.equals("bool") &&
            !name.equals("time_t") &&
            !name.equals("void") &&
-           !name.equals("vector<" + c.name + "*>&") &&
+           !name.startsWith("vector<") &&
            !name.equals("ResultSetIterator<" + c.name + ">*") &&
-           !name.startsWith(c.name);
+           !name.startsWith(c.name)) ||
+           name.endsWith("**");
+  }
+
+  public String getGeneric() {
+    return name.substring(name.indexOf("<") + 1, name.lastIndexOf(">"));
   }
 
   public String unwrap(String from, String to, String sp, String namespace, CppClass cppClass) {
@@ -49,12 +54,12 @@ public class CppType {
       return sp + "bool " + to + "(" + from + "->BooleanValue());";
     } else if (name.equals("time_t")) {
       return sp + "time_t " + to + "(" + from + "->Uint32Value() / 1000);";
-    } else if (name.startsWith("vector<" + cppClass.name + "*>")) {
+    } else if (name.startsWith("vector<")) {
       StringBuilder sb = new StringBuilder();
+      CppType generic = new CppType(getGeneric());
       sb.append(sp + "v8::Local<v8::Array> array = v8::Local<v8::Array>::Cast(" + from + ");\n");
-      sb.append(sp + "vector<" + namespace + cppClass.name + "*> " + to + ";\n");
+      sb.append(sp + "std::vector<" + ((generic.isUnknownType(cppClass) || generic.name.startsWith(cppClass.name)) ? namespace.toString() : "") + generic.name + "> " + to + ";\n");
       sb.append(sp + "for (int i = 0; i < array->Length(); ++i) {\n");
-      CppType generic = new CppType(name.substring(7, name.lastIndexOf(">")));
       sb.append(sp + "  " + "v8::Local<v8::Value> tmp = array->Get(i);\n");
       sb.append(generic.unwrap("tmp", "x", sp + "  ", namespace, cppClass) + "\n");
       sb.append(sp + "  " + to + ".push_back(x);\n");

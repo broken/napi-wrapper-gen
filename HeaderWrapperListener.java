@@ -60,7 +60,10 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     p("class " + cppClass.name + " : public node::ObjectWrap {");
     p(" public:");
     p("  static void Init(v8::Handle<v8::Object> exports);");
-    p("  static NAN_METHOD(NewInstance);");
+    p("  static v8::Local<v8::Object> NewInstance();");
+    p("");
+    p("  void setNwcpValue(" + cppNamespace + cppClass.name + "* v) { " + cppClass.name.toLowerCase() + " = v; }");
+    p("  " + cppNamespace + cppClass.name + "* getNwcpValue() const { return " + cppClass.name.toLowerCase() + "; }");
     p("");
     p(" private:");
     p("  " + cppClass.name + "();");
@@ -68,8 +71,6 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     p("  ~" + cppClass.name + "();");
     p("");
     p("  static NAN_METHOD(New);");
-    p("");
-    p("  " + cppNamespace + cppClass.name + "* getNwcpValue() const { return " + cppClass.name.toLowerCase() + "; }");
     p("");
     for (CppMethod m : cppClass.methods) {
       if (m.returnType.isUnknownType(cppClass)) continue;
