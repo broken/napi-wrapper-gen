@@ -4,6 +4,8 @@ import java.util.List;
 public class CppMethod {
   public boolean isStatic = false;
   public boolean isConst = false;
+  public boolean isGetter = false;
+  public boolean isSetter = false;
   public boolean isClassType;
   public CppType returnType;
   public String name;
@@ -17,6 +19,8 @@ public class CppMethod {
     for (nodewebkitwrapperParser.ParameterContext p : ctx.parameterList().parameter()) {
       args.add(new CppType(p.type()));
     }
+    isGetter = name.startsWith("get") && name.substring(3,4).equals(name.substring(3,4).toUpperCase()) && args.size() == 0;
+    isSetter = name.startsWith("set") && name.substring(3,4).equals(name.substring(3,4).toUpperCase()) && args.size() == 1;
 
     isClassType = !returnType.name.equals("int")
           && !returnType.name.startsWith("string")
@@ -28,5 +32,9 @@ public class CppMethod {
 
   public boolean isInstanceOf(CppClass cppClass) {
     return returnType.name.equals(cppClass.name + "*");
+  }
+
+  public String accessor() {
+    return name.substring(3,4).toLowerCase() + name.substring(4);
   }
 }

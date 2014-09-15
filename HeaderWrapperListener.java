@@ -79,7 +79,13 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
         cannotHandleArg |= t.isUnknownType(cppClass);
       }
       if (cannotHandleArg) continue;
-      p("  static NAN_METHOD(" + m.name + ");");
+      if (m.isGetter) {
+        p("  static NAN_GETTER(" + m.name + ");");
+      } else if (m.isSetter) {
+        p("  static NAN_SETTER(" + m.name + ");");
+      } else {
+        p("  static NAN_METHOD(" + m.name + ");");
+      }
     }
     p("");
     p("  static v8::Persistent<v8::Function> constructor;");

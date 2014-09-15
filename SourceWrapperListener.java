@@ -4,7 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.HashSet;
 
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.misc.Interval;
@@ -15,7 +15,9 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
   CppClass cppClass = new CppClass();
   CppNamespace cppNamespace = new CppNamespace();
   OutputStream os;
-  Set<String> classes = new TreeSet<String>();
+  Set<String> classes = new HashSet<String>();
+  Set<String> getters = new HashSet<String>();
+  Set<String> setters = new HashSet<String>();
 
   public SourceWrapperListener(nodewebkitwrapperParser p) {
     parser = p;
@@ -130,13 +132,28 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     p("");
     for (CppMethod m : cppClass.methods) {
       if (skipMethod(m) || !m.isStatic) continue;
+      if (m.isGetter || m.isSetter) continue;
       p("  NanSetTemplate(tpl, \"" + m.name + "\", NanNew<v8::FunctionTemplate>(" + m.name + ")->GetFunction());");
     }
     p("");
     p("  // Prototype");
     for (CppMethod m : cppClass.methods) {
       if (skipMethod(m) || m.isStatic) continue;
+      if (m.isGetter || m.isSetter) continue;
       p("  NanSetPrototypeTemplate(tpl, \"" + m.name + "\", NanNew<v8::FunctionTemplate>(" + m.name + ")->GetFunction());");
+    }
+    p("");
+    p("  // Accessors");
+    for (CppMethod m : cppClass.methods) {
+      if (skipMethod(m) || m.isStatic) continue;
+      if (m.isGetter) {
+        p("  tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(\"" + m.accessor() + "\"), " + m.name, false);
+        if (setters.contains(m.accessor())) {
+          p(", " + "s" + m.name.substring(1) + ");");
+        } else {
+          p(");");
+        }
+      }
     }
     p("");
     p("  NanAssignPersistent<v8::Function>(constructor, tpl->GetFunction());");
@@ -146,13 +163,14 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     for (CppMethod m : cppClass.methods) {
       if (skipMethod(m)) continue;
       p("");
-      p("NAN_METHOD(" + cppClass.name + "::" + m.name + ") {");
+      p(m.isGetter ? "NAN_GETTER" : m.isSetter ? "NAN_SETTER" : "NAN_METHOD", false);
+      p("(" + cppClass.name + "::" + m.name + ") {");
       p("  NanScope();");
       p("");
       if (!m.isStatic)
         p("  " + cppClass.name + "* obj = ObjectWrap::Unwrap<" + cppClass.name + ">(args.This());");
       for (int i = 0; i < m.args.size(); ++i) {
-        p(m.args.get(i).unwrap("args[" + i + "]", "a" + i, "  ", cppNamespace.toString(), cppClass));
+        p(m.args.get(i).unwrap((m.isSetter ? "value" : "args[" + i + "]"), "a" + i, "  ", cppNamespace.toString(), cppClass));
       }
       if (m.isInstanceOf(cppClass)) {
         p("  " + cppNamespace + cppClass.name + "* " + cppClass.name.toLowerCase() + " =");
@@ -243,6 +261,17 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
         classes.add(g);
       }
     }
+    for (CppType argType : m.args) {
+      if (argType.isVector) {
+        String g = argType.getGeneric();
+        g = g.replaceAll("(&|\\*)", "");
+        if (!g.equals(cppClass.name)) {
+          classes.add(g);
+        }
+      }
+    }
+    if (m.isGetter) getters.add(m.accessor());
+    if (m.isSetter) setters.add(m.accessor());
   }
 
 }
