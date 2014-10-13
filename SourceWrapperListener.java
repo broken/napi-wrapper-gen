@@ -63,13 +63,11 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
   }
 
   public boolean skipMethod(CppMethod m) {
-    if (m.returnType.isUnknownType(cppClass)) return true;
     boolean cannotHandleArg = false;
     for (CppType t : m.args) {
       cannotHandleArg |= t.isUnknownType(cppClass);
     }
-    if (cannotHandleArg) return true;
-    return false;
+    return cannotHandleArg;
   }
 
   @Override public void enterNamespace(@NotNull nodewebkitwrapperParser.NamespaceContext ctx) {
@@ -198,6 +196,9 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
         if (!m.returnType.isVoid)
           p("  " + (m.returnType.isConst ? "const " : "") + (m.isClassType ? cppNamespace : "") + (m.returnType.isReference ? m.returnType.name.substring(0, m.returnType.name.length()-1) : m.returnType.name) + " result =", false);
         p("  obj->" + cppClass.name.toLowerCase() + "->" + m.name + "(" + paramList(m.args) + ");");
+        if (m.returnType.isUnknownType(cppClass)) {
+          p("  if (result == NULL) NanReturnUndefined();");
+        }
       }
       p("");
       if (m.returnType.isVoid) {
@@ -206,9 +207,10 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
         p("  NanReturnValue(instance);");
       } else if (m.isClassType) {
         String typeName = m.returnType.name.replaceAll("(&|\\*)", "");
-        p("  " + m.returnType.name + " r = " + typeName + ".NewInstance();");
-        p("  r->" + typeName.toLowerCase() + " = result;");
-        p("  NanReturnValue(r);");
+        p("  v8::Local<v8::Object> instance = " + typeName + "::NewInstance();");
+        p("  " + m.returnType.name + " r = ObjectWrap::Unwrap<" + typeName + ">(instance);");
+        p("  r->setNwcpValue(result);");
+        p("  NanReturnValue(instance);");
       } else if (m.returnType.name.equals("vector<" + cppClass.name + "*>&") ||
             m.returnType.name.equals("vector<" + cppClass.name + "*>")) {
         p("  v8::Handle<v8::Array> a = NanNew<v8::Array>((int) result" + (m.returnType.isPointer ? "->" : ".") + "size());");
@@ -253,6 +255,7 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
 
   @Override public void enterMethod(@NotNull nodewebkitwrapperParser.MethodContext ctx) {
     CppMethod m = new CppMethod(ctx);
+    if (skipMethod(m)) return;
     cppClass.methods.add(m);
     if (m.returnType.isVector) {
       String g = m.returnType.getGeneric();
@@ -260,6 +263,8 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
       if (!g.equals(cppClass.name)) {
         classes.add(g);
       }
+    } else if (m.returnType.isUnknownType(cppClass) && !m.returnType.isSet) {
+      classes.add(m.returnType.name.replaceAll("(&|\\*)", ""));
     }
     for (CppType argType : m.args) {
       if (argType.isVector) {

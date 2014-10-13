@@ -73,7 +73,6 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     p("  static NAN_METHOD(New);");
     p("");
     for (CppMethod m : cppClass.methods) {
-      if (m.returnType.isUnknownType(cppClass)) continue;
       boolean cannotHandleArg = false;
       for (CppType t : m.args) {
         cannotHandleArg |= t.isUnknownType(cppClass);
