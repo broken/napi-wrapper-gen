@@ -1,0 +1,53 @@
+<project>
+  <property name="classpath" value="/usr/local/Cellar/antlr/4.4/antlr-4.4-complete.jar"/>
+  <property name="build.dir" value="build" />
+  <property name="classes.dir" value="${build.dir}/classes" />
+  <property name="jar.dir" value="${build.dir}/jar" />
+  <property name="src.dir" value="src" />
+  <property name="srcgen.dir" value="${build.dir}/grammar" />
+
+  <target name="clean">
+    <delete dir="${build.dir}"/>
+  </target>
+
+  <target name="antlr">
+    <mkdir dir="${srcgen.dir}"/>
+    <exec executable="antlr4">
+      <arg value="-o"/>
+      <arg value="${srcgen.dir}"/>
+      <arg value="-package"/>
+      <arg value="com.dogatech.nodewebkitwrapper.grammar"/>
+      <arg value="${src.dir}/nodewebkitwrapper.g4"/>
+    </exec>
+  </target>
+
+  <target name="compile">
+    <mkdir dir="${classes.dir}"/>
+    <javac destdir="${classes.dir}">
+      <src path="${srcgen.dir}"/>
+      <src path="${src.dir}"/>
+    </javac>
+  </target>
+
+  <target name="jar">
+    <mkdir dir="${jar.dir}"/>
+    <jar destfile="${jar.dir}/SoulSifterNodeWebkitWrapperTool.jar" basedir="build/classes">
+      <manifest>
+        <attribute name="Main-Class" value="com.dogatech.soulsifter.nodewebkitwrapper.SoulSifterWrapperTool"/>
+        <attribute name="Class-Path" value="${classpath}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="run">
+    <java jar="${jar.dir}/SoulSifterNodeWebkitWrapperTool.jar" fork="true"/>
+  </target>
+
+  <target name="all">
+    <antcall target="clean"/>
+    <antcall target="antlr"/>
+    <antcall target="compile"/>
+    <antcall target="jar"/>
+    <antcall target="run"/>
+  </target>
+</project>

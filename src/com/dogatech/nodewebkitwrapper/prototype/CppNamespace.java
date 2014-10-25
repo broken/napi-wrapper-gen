@@ -1,5 +1,8 @@
+package com.dogatech.nodewebkitwrapper.prototype;
+
 import java.util.Iterator;
 import java.util.Stack;
+
 
 public class CppNamespace {
   private Stack<String> namespaces = new Stack<String>();

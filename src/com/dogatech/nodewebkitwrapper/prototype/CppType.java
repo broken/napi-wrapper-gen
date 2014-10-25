@@ -1,3 +1,8 @@
+package com.dogatech.nodewebkitwrapper.prototype;
+
+import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
+
+
 public class CppType {
   public boolean isVoid;
   public boolean isSet;

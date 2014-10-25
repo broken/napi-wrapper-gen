@@ -1,5 +1,8 @@
+package com.dogatech.nodewebkitwrapper.prototype;
+
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class CppClass {
   public String name;

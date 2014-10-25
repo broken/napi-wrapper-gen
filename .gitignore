@@ -2,9 +2,7 @@
 .DS_Store
 
 # Build files
-*.class
-*.tokens
-nodewebkitwrapper*.java
+build/
 
 # Output files
 *_wrap.cc
@@ -17,3 +15,6 @@ nodewebkitwrapper*.java
 
 # Test files
 test
+
+# Link to source files to process
+resources

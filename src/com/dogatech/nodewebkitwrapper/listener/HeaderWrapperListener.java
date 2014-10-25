@@ -1,3 +1,5 @@
+package com.dogatech.nodewebkitwrapper.listener;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Iterator;
@@ -6,6 +8,14 @@ import java.util.Stack;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.NotNull;
+
+import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperBaseListener;
+import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
+import com.dogatech.nodewebkitwrapper.prototype.CppClass;
+import com.dogatech.nodewebkitwrapper.prototype.CppNamespace;
+import com.dogatech.nodewebkitwrapper.prototype.CppMethod;
+import com.dogatech.nodewebkitwrapper.prototype.CppType;
+
 
 public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
   nodewebkitwrapperParser parser;

@@ -24,14 +24,16 @@ Dislaimer Section
 
 How to run
 ----------
-antlr4 nodewebkitwrapper.g4 && javac nodewebkitwrapper*.java HeaderWrapper*.java SourceWrapperTool*.java Cpp*.java WrapperTool.java && java WrapperTool __file.h__
+ant all
 
-alternative:
+  note: that I haven't taken the time to split this out for other projects.
 
-antlr4 nodewebkitwrapper.g4 && javac nodewebkitwrapper*.java HeaderWrapper*.java SourceWrapperTool*.java Cpp*.java && grun nodewebkitwrapper header -tree < __file.h__ && java HeaderWrapperTool __file.h__ > __file_wrap.h__ && java SourceWrapperTool __file.h__ > __file_wrap.cpp__
+old:
+
+antlr4 -o build nodewebkitwrapper.g4 && javac nodewebkitwrapper*.java HeaderWrapper*.java SourceWrapperTool*.java Cpp*.java && grun nodewebkitwrapper header -tree < __file.h__ && java HeaderWrapperTool __file.h__ > __file_wrap.h__ && java SourceWrapperTool __file.h__ > __file_wrap.cpp__
 
 
-Test grammar
+Test grammar (out of date)
 ------------
 antlr4 nodewebkitwrapper.g4 && javac nodewebkitwrapper*.java && grun nodewebkitwrapper header -gui < __file.h__
 

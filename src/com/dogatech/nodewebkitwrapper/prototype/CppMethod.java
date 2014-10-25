@@ -1,5 +1,10 @@
+package com.dogatech.nodewebkitwrapper.prototype;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
+
 
 public class CppMethod {
   public boolean isStatic = false;
