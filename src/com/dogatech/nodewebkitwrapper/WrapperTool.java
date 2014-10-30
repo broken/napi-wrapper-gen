@@ -15,6 +15,7 @@ import java.nio.file.FileSystems;
 
 import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperLexer;
 import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
+import com.dogatech.nodewebkitwrapper.io.FileOutputter;
 import com.dogatech.nodewebkitwrapper.listener.HeaderWrapperListener;
 import com.dogatech.nodewebkitwrapper.listener.SourceWrapperListener;
 
@@ -43,10 +44,10 @@ public class WrapperTool {
       ParseTree tree = parser.header(); // parse
 
       ParseTreeWalker walker = new ParseTreeWalker(); // create standard walker
-      HeaderWrapperListener extractor = new HeaderWrapperListener(parser, new FileOutputStream(outputHeader));
+      HeaderWrapperListener extractor = new HeaderWrapperListener(parser, new FileOutputter(new FileOutputStream(outputHeader)));
       walker.walk(extractor, tree); // initiate walk of tree with listener
 
-      SourceWrapperListener extractor2 = new SourceWrapperListener(parser, new FileOutputStream(outputSource));
+      SourceWrapperListener extractor2 = new SourceWrapperListener(parser, new FileOutputter(new FileOutputStream(outputSource)));
       walker.walk(extractor2, tree); // initiate walk of tree with listener
     }
   }

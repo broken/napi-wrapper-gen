@@ -1,49 +1,54 @@
-package com.dogatech.nodewebkitwrapper.prototype;
+package com.dogatech.nodewebkitwrapper.prototype.type;
 
 import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
+import com.dogatech.nodewebkitwrapper.io.Outputter;
+import com.dogatech.nodewebkitwrapper.prototype.CppClass;
+import com.dogatech.nodewebkitwrapper.prototype.CppMethod;
 
 
-public class CppType {
-  public boolean isVoid;
-  public boolean isSet;
-  public boolean isVector;
-
-  public boolean isConst = false;
-  public boolean isPointer = false;
-  public boolean isPointerToPointer = false;
-  public boolean isReference = false;
+public abstract class CppType {
+  protected boolean isConst;
+  protected boolean isPointer;
+  protected boolean isReference;
   public String name;
+  protected CppClass cppClass;
+  protected Outputter o;
 
-  public CppType(nodewebkitwrapperParser.TypeContext ctx) {
-    isConst = ctx.CONST() != null;
-    name = ctx.Identifier().toString();
-    isVoid = name.equals("void");
-    isSet = name.startsWith("set<");
-    isVector = name.startsWith("vector<");
-    isPointer = name.charAt(name.length() - 1) == '*';
-    isReference = name.charAt(name.length() - 1) == '&';
+  /** Returns true if this object can handle the given type string */
+  public abstract boolean isType(String name);
+
+  /** Writes to the Outputter how this object should be returned from a call. */
+  public void outputResult() {
+    o.i().p((isConst ? "const " : "") + nameSansRef() + " result =", false);
   }
 
-  public CppType(String type) {
-    name = type;
-    isConst = name.startsWith("const");
-    isVoid = name.equals("void");
-    isSet = name.startsWith("set<");
-    isVector = name.startsWith("vector<");
-    isPointer = name.charAt(name.length() - 1) == '*';
-    isReference = name.charAt(name.length() - 1) == '&';
+  /** Writes to the Outputter how this type should be wrapped are returned. */
+  public void outputReturn() {
+    o.i().p("NanReturnValue(", false);
+    outputWrap("result");
+    o.p(");");
   }
 
-  public boolean isUnknownType(CppClass c) {
-    return (!name.equals("int") &&
-           !name.startsWith("string") &&
-           !name.equals("bool") &&
-           !name.equals("time_t") &&
-           !name.equals("void") &&
-           !name.startsWith("vector<") &&
-           !name.equals("ResultSetIterator<" + c.name + ">*") &&
-           !name.startsWith(c.name)) ||
-           name.endsWith("**");
+  /** Returns a string for how this object is wrapped. */
+  public void outputWrap(String var) {
+    o.p("/* not implemented */", false);
+  }
+
+  public void outputUnwrap(String from, String to, String sp) {
+    o.p("/* not implemented */", false);
+  }
+
+  protected void init(String n, CppClass c, Outputter out) {
+    cppClass = c;
+    name = n;
+    isPointer = name.charAt(name.length() - 1) == '*';
+    isReference = name.charAt(name.length() - 1) == '&';
+
+    o = out;
+  }
+
+  protected String nameSansRef() {
+    return isReference ? name.substring(0, name.length()-1) : name;
   }
 
   public String getGeneric() {
@@ -61,33 +66,19 @@ public class CppType {
       return sp + "time_t " + to + "(" + from + "->Uint32Value() / 1000);";
     } else if (name.startsWith("vector<")) {
       StringBuilder sb = new StringBuilder();
-      CppType generic = new CppType(getGeneric());
+      /*CppType generic = new CppType(getGeneric());
       sb.append(sp + "v8::Local<v8::Array> array = v8::Local<v8::Array>::Cast(" + from + ");\n");
       sb.append(sp + "std::vector<" + ((generic.isUnknownType(cppClass) || generic.name.startsWith(cppClass.name)) ? namespace.toString() : "") + generic.name + "> " + to + ";\n");
       sb.append(sp + "for (int i = 0; i < array->Length(); ++i) {\n");
       sb.append(sp + "  " + "v8::Local<v8::Value> tmp = array->Get(i);\n");
       sb.append(generic.unwrap("tmp", "x", sp + "  ", namespace, cppClass) + "\n");
       sb.append(sp + "  " + to + ".push_back(x);\n");
-      sb.append(sp + "}");
+      sb.append(sp + "}");*/
       return sb.toString();
     } else if (name.endsWith("*")) {
       return sp + namespace + name + " " + to + "(node::ObjectWrap::Unwrap<" + name.replaceAll("(\\*|&)", "") + ">(" + from + "->ToObject())->getNwcpValue())" + (isReference ? "*" : "") + ";";
     } else {
       return sp + namespace + name.replaceAll("(\\*|&)", "") + " " + to + "(node::ObjectWrap::Unwrap<" + name.replaceAll("(\\*|&)", "") + ">(" + from + "->ToObject())->getNwcpValue())" + (isReference ? "*" : "") + ";";
-    }
-  }
-
-  public String wrap(String var) {
-    if (name.equals("int")) {
-      return "NanNew<v8::Number>(" + var + ")";
-    } else if (name.startsWith("string")) {
-      return "NanNew<v8::String>(" + var + ".c_str(), " + var + ".length())";
-    } else if (name.equals("bool")) {
-      return "NanNew<v8::Boolean>(" + var + ")";
-    } else if (name.equals("time_t")) {
-      return "NanNew<v8::Number>(" + var + "* 1000)";
-    } else {
-      return "";
     }
   }
 }
