@@ -35,7 +35,7 @@ parameter: type Identifier;
 cppClass: CLASS Identifier LCBRACE classBlock RCBRACE SEMICOLON;
 
 block: LCBRACE innerBlock RCBRACE;
-innerBlock: (Identifier | ';' | block | type | STATIC) innerBlock;
+innerBlock: (Identifier | SEMICOLON | block | type | STATIC) innerBlock;
 
 type: CONST? Identifier Modifier?;
 
