@@ -23,9 +23,9 @@ import com.dogatech.nodewebkitwrapper.prototype.type.CppType;
 
 public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
   nodewebkitwrapperParser parser;
-  CppClass cppClass;
-  CppNamespace cppNamespace = new CppNamespace();
   Outputter o;
+  CppNamespace cppNamespace = new CppNamespace();
+  CppClass cppClass;
   Set<String> classes = new HashSet<String>();
   Set<String> getters = new HashSet<String>();
   Set<String> setters = new HashSet<String>();
@@ -35,77 +35,40 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     o = out;
   }
 
-  private boolean isSingleton() {
-    for (CppMethod m : cppClass.methods) {
-      if (m.name.equals("getInstance")) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public boolean skipMethod(CppMethod m) {
-    boolean cannotHandleArg = false;
-    /*for (CppType t : m.args) {
-      cannotHandleArg |= t.isUnknownType(cppClass);
-    }*/
-    return cannotHandleArg;
-  }
-
-  @Override
-  public void enterNamespace(@NotNull nodewebkitwrapperParser.NamespaceContext ctx) {
-    cppNamespace.push(ctx.Identifier().toString());
-  }
-
-  @Override
-  public void exitNamespace(@NotNull nodewebkitwrapperParser.NamespaceContext ctx) {
-    cppNamespace.pop();
-  }
-
-  @Override
-  public void enterCppClass(@NotNull nodewebkitwrapperParser.CppClassContext ctx) {
-    cppClass = new CppClass(cppNamespace);
-    cppClass.name = ctx.Identifier().toString();
-  }
-
   @Override public void exitCppClass(@NotNull nodewebkitwrapperParser.CppClassContext ctx) {
-    o.p("#include <iostream>");
-    o.p("#include <node.h>");
-    o.p("#include <nan.h>");
-    o.p("#include \"" + cppClass.name + ".h\"");
-    o.p("#include \"" + cppClass.name + "_wrap.h\"");
+    o.i().p("#include <iostream>");
+    o.i().p("#include <node.h>");
+    o.i().p("#include <nan.h>");
+    o.i().p("#include \"" + cppClass.name + ".h\"");
+    o.i().p("#include \"" + cppClass.name + "_wrap.h\"");
     for (String n : classes) {
-      o.p("#include \"" + n + ".h\"");
-      o.p("#include \"" + n + "_wrap.h\"");
+      o.i().p("#include \"" + n + ".h\"");
+      o.i().p("#include \"" + n + "_wrap.h\"");
     }
     o.p("");
-    o.p("v8::Persistent<v8::Function> " + cppClass.name + "::constructor;");
+    o.i().p("v8::Persistent<v8::Function> " + cppClass.name + "::constructor;");
     o.p("");
-    if (isSingleton()) {
-      o.p(cppClass.name + "::" + cppClass.name + "() : ObjectWrap(), " + cppClass.name.toLowerCase() + "(&(" + cppNamespace + cppClass.name + "::getInstance())) {};");
-    } else {
-      o.p(cppClass.name + "::" + cppClass.name + "() : ObjectWrap(), " + cppClass.name.toLowerCase() + "(new " + cppNamespace + cppClass.name + "()) {};");
-    }
+    o.p(cppClass.name + "::" + cppClass.name + "() : ObjectWrap(), " + cppClass.name.toLowerCase() + "(" + cppClass.createNewPointer() + ") {};");
     o.p(cppClass.name + "::" + cppClass.name + "(" + cppNamespace + cppClass.name + "* o) : ObjectWrap(), " + cppClass.name.toLowerCase() + "(o) {};");
     o.p(cppClass.name + "::~" + cppClass.name + "() { delete " + cppClass.name.toLowerCase() + "; };");
     o.p("");
-    o.p("NAN_METHOD(" + cppClass.name + "::New) {").incIndent();
+    o.i().p("NAN_METHOD(" + cppClass.name + "::New) {").incIndent();
     o.i().p("NanScope();");
     o.p("");
     o.i().p("" + cppClass.name + "* obj = new " + cppClass.name + "();");
     o.i().p("obj->Wrap(args.This());");
     o.p("");
     o.i().p("NanReturnValue(args.This());");
-    o.p("}");
+    o.i().p("}");
     o.p("");
-    o.p("v8::Local<v8::Object> " + cppClass.name + "::NewInstance() {");
+    o.i().p("v8::Local<v8::Object> " + cppClass.name + "::NewInstance() {");
     o.i().p("v8::Local<v8::Function> cons = NanNew<v8::Function>(constructor);");
     o.i().p("v8::Local<v8::Object> instance = cons->NewInstance();");
     o.p("");
     o.i().p("return instance;");
-    o.p("}");
+    o.i().p("}");
     o.p("");
-    o.p("void " + cppClass.name + "::Init(v8::Handle<v8::Object> exports) {");
+    o.i().p("void " + cppClass.name + "::Init(v8::Handle<v8::Object> exports) {");
     o.i().p("NanScope();");
     o.p("");
     o.i().p("// Prepare constructor template");
@@ -130,7 +93,6 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
 
   @Override public void enterMethod(@NotNull nodewebkitwrapperParser.MethodContext ctx) {
     CppMethod m = new CppMethod(cppClass, ctx, o);
-    if (skipMethod(m)) return;
     cppClass.methods.add(m);
     /*if (m.returnType.isVector) {
       String g = m.returnType.getGeneric();
@@ -152,6 +114,21 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     }
     if (m.isGetter) getters.add(m.accessor());
     if (m.isSetter) setters.add(m.accessor());
+  }
+
+  @Override
+  public void enterNamespace(@NotNull nodewebkitwrapperParser.NamespaceContext ctx) {
+    cppNamespace.push(ctx.Identifier().toString());
+  }
+
+  @Override
+  public void exitNamespace(@NotNull nodewebkitwrapperParser.NamespaceContext ctx) {
+    cppNamespace.pop();
+  }
+
+  @Override
+  public void enterCppClass(@NotNull nodewebkitwrapperParser.CppClassContext ctx) {
+    cppClass = new CppClass(cppNamespace, ctx);
   }
 
 }

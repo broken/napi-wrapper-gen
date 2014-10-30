@@ -20,26 +20,13 @@ import com.dogatech.nodewebkitwrapper.prototype.type.CppType;
 
 public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
   nodewebkitwrapperParser parser;
-  CppClass cppClass;
-  CppNamespace cppNamespace = new CppNamespace();
   Outputter o;
+  CppNamespace cppNamespace = new CppNamespace();
+  CppClass cppClass;
 
   public HeaderWrapperListener(nodewebkitwrapperParser p, Outputter out) {
     parser = p;
     o = out;
-  }
-
-  @Override public void enterNamespace(@NotNull nodewebkitwrapperParser.NamespaceContext ctx) {
-    cppNamespace.push(ctx.Identifier().toString());
-  }
-
-  @Override public void exitNamespace(@NotNull nodewebkitwrapperParser.NamespaceContext ctx) {
-    cppNamespace.pop();
-  }
-
-  @Override public void enterCppClass(@NotNull nodewebkitwrapperParser.CppClassContext ctx) {
-    cppClass = new CppClass(cppNamespace);
-    cppClass.name = ctx.Identifier().toString();
   }
 
   @Override public void exitCppClass(@NotNull nodewebkitwrapperParser.CppClassContext ctx) {
@@ -66,11 +53,6 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     o.i().p("static NAN_METHOD(New);");
     o.p("");
     for (CppMethod m : cppClass.methods) {
-      boolean cannotHandleArg = false;
-      /*for (CppType t : m.args) {
-        cannotHandleArg |= t.isUnknownType(cppClass);
-      }
-      if (cannotHandleArg) continue;*/
       m.outputHeader();
     }
     o.p("");
@@ -80,6 +62,18 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     o.i().p("};");
     o.p("");
     o.i().p("#endif");
+  }
+
+  @Override public void enterNamespace(@NotNull nodewebkitwrapperParser.NamespaceContext ctx) {
+    cppNamespace.push(ctx.Identifier().toString());
+  }
+
+  @Override public void exitNamespace(@NotNull nodewebkitwrapperParser.NamespaceContext ctx) {
+    cppNamespace.pop();
+  }
+
+  @Override public void enterCppClass(@NotNull nodewebkitwrapperParser.CppClassContext ctx) {
+    cppClass = new CppClass(cppNamespace, ctx);
   }
 
   @Override public void enterMethod(@NotNull nodewebkitwrapperParser.MethodContext ctx) {
