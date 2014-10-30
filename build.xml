@@ -1,4 +1,5 @@
-<project>
+<project default="go">
+
   <property name="classpath" value="/usr/local/Cellar/antlr/4.4/antlr-4.4-complete.jar"/>
   <property name="build.dir" value="build" />
   <property name="classes.dir" value="${build.dir}/classes" />
@@ -50,4 +51,11 @@
     <antcall target="jar"/>
     <antcall target="run"/>
   </target>
+
+  <target name="go">
+    <antcall target="compile"/>
+    <antcall target="jar"/>
+    <antcall target="run"/>
+  </target>
+
 </project>
