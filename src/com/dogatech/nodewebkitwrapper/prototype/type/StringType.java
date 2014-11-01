@@ -15,4 +15,9 @@ public class StringType extends CppType {
   public void outputWrap(String var) {
     o.p("NanNew<v8::String>(" + var + ".c_str(), " + var + ".length())", false);
   }
+
+  @Override
+  public void outputUnwrap(String from, String to) {
+    o.i().p("string " + to + "(" + "*v8::String::Utf8Value(" + from + "->ToString()));");
+  }
 }

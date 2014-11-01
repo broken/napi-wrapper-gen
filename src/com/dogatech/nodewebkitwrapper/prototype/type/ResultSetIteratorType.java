@@ -30,4 +30,9 @@ public class ResultSetIteratorType extends CppType {
     o.i().p("delete v;");
     o.i().p("NanReturnValue(a);");
   }
+
+  @Override
+  public String[] requiredHeaders() {
+    return new String[] { "ResultSetIterator.h" };
+  }
 }

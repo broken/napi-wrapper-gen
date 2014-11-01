@@ -19,7 +19,7 @@ public class CppMethod {
   public boolean isGetter; // TODO remove
   public boolean isSetter; // TODO remove
   private Outputter o;
-  private boolean broken;
+  public boolean broken;
 
   public CppMethod(CppClass parentClass, nodewebkitwrapperParser.MethodContext ctx, Outputter out) {
     isStatic = ctx.STATIC() != null;
@@ -76,13 +76,14 @@ public class CppMethod {
       o.i().p(cppClass.name + "* obj = ObjectWrap::Unwrap<" + cppClass.name + ">(args.This());");
     for (int i = 0; i < args.size(); ++i) {
       String arg = type instanceof MtSetter ? "value" : "args[" + i + "]";
-      o.p(args.get(i).unwrap(arg, "a" + i, "  ", namespace, cppClass));
+      args.get(i).outputUnwrap(arg, "a" + i);
     }
     returnType.outputResult();
     access.out();
     o.p("");
     returnType.outputReturn();
     o.decIndent().i().p("}");
+    o.p("");
   }
 
   public void outputDeclaration() {
@@ -97,7 +98,7 @@ public class CppMethod {
     } else {
       if (isGetter) {
         o.i().p("tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(\"" + accessor() + "\"), " + name, false);
-        if (true) {// TODO cppClass.setters.contains(accessor())) {
+        if (cppClass.setters.contains(accessor())) {  // TODO check if setter is broken
           o.p(", " + "s" + name.substring(1) + ");");
         } else {
           o.p(");");

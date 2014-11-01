@@ -52,7 +52,7 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     o.p("");
     o.i().p("static NAN_METHOD(New);");
     o.p("");
-    for (CppMethod m : cppClass.methods) {
+    for (CppMethod m : cppClass.methods.values()) {
       m.outputHeader();
     }
     o.p("");
@@ -77,7 +77,7 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
   }
 
   @Override public void enterMethod(@NotNull nodewebkitwrapperParser.MethodContext ctx) {
-    cppClass.methods.add(new CppMethod(cppClass, ctx, o));
+    cppClass.addMethod(new CppMethod(cppClass, ctx, o));
   }
 
 }

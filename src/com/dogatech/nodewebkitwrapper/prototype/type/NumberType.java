@@ -15,4 +15,9 @@ public class NumberType extends CppType {
   public void outputWrap(String var) {
     o.p("NanNew<v8::Number>(" + var + ")", false);
   }
+
+  @Override
+  public void outputUnwrap(String from, String to) {
+    o.i().p("int " + to + "(" + from + "->Uint32Value());");
+  }
 }
