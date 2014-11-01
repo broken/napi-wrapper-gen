@@ -9,13 +9,14 @@ Requirements
 * node-webkit
 * nw-gyp
 * nan
+* ant
 
 
 Dislaimer Section
 -----------------
 1. This is currently a work in progress, but once it meets the needs for my current project, I'll most likely cease work until I finish that project.
 
-2. I wrote just enough to wrap the classes I needed. That means this is by no means an exhaustive translation tool. However, it's simple enough that you should be able to plug the holes to fit your needs.
+2. I wrote just enough to wrap the classes I needed. For one, that means it's written mostly like a script, and less like a well structured program.  It also means this is by no means an exhaustive translation tool. However, it's simple enough that you should be able to plug the holes to fit your needs.
 
 3. I do not know antlr. I read just enough to build this grammar to work for me. I could have probably used antlr3, as I believe there is a C++ grammar for it, but after testing the C grammar on my header files, I realized that any complete grammar would be overkill, and writing my own would be much easier when building the translation listeners.
 
@@ -28,12 +29,13 @@ ant all
 
   note: that I haven't taken the time to split this out for other projects.
 
-old:
 
-antlr4 -o build nodewebkitwrapper.g4 && javac nodewebkitwrapper*.java HeaderWrapper*.java SourceWrapperTool*.java Cpp*.java && grun nodewebkitwrapper header -tree < __file.h__ && java HeaderWrapperTool __file.h__ > __file_wrap.h__ && java SourceWrapperTool __file.h__ > __file_wrap.cpp__
+Sample output
+-------------
+You can view the output _*.wrap_ files of this program in my SoulSifter project.
+https://github.com/broken/soulsifter/tree/master/src/soulsifter
 
 
 Test grammar (out of date)
 ------------
 antlr4 nodewebkitwrapper.g4 && javac nodewebkitwrapper*.java && grun nodewebkitwrapper header -gui < __file.h__
-
