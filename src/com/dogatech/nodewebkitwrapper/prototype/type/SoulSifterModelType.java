@@ -42,7 +42,7 @@ public class SoulSifterModelType extends CppType {
   @Override
   public void outputUnwrap(String from, String to) {
     o.i().p("dogatech::soulsifter::" + name + "* " + to + "tmp(node::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject())->getNwcpValue());");
-    o.i().p("dogatech::soulsifter::" + name + "& " + to + " = " + to + "tmp*;");
+    o.i().p("dogatech::soulsifter::" + name + "& " + to + " = *" + to + "tmp;");
   }
 
   @Override

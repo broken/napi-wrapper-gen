@@ -39,6 +39,7 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     o.i().p("#include <iostream>");
     o.i().p("#include <node.h>");
     o.i().p("#include <nan.h>");
+    o.i().p("#include \"" + cppClass.name + "_wrap.h\"");
     SortedSet<String> headers = new TreeSet<String>();
     for (CppMethod m : cppClass.methods.values()) {
       if (m.broken) continue;
@@ -57,7 +58,7 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     o.p("");
     o.i().p("v8::Persistent<v8::Function> " + cppClass.name + "::constructor;");
     o.p("");
-    o.p(cppClass.name + "::" + cppClass.name + "() : ObjectWrap(), " + cppClass.name.toLowerCase() + "(null), ownWrappedObject(true) {};");
+    o.p(cppClass.name + "::" + cppClass.name + "() : ObjectWrap(), " + cppClass.name.toLowerCase() + "(NULL), ownWrappedObject(true) {};");
     o.p(cppClass.name + "::" + cppClass.name + "(" + cppNamespace + cppClass.name + "* o) : ObjectWrap(), " + cppClass.name.toLowerCase() + "(o), ownWrappedObject(true) {};");
     o.p(cppClass.name + "::~" + cppClass.name + "() { if (ownWrappedObject) delete " + cppClass.name.toLowerCase() + "; };");
     o.p("");
