@@ -1,5 +1,7 @@
 package com.dogatech.nodewebkitwrapper.prototype.type;
 
+import java.util.Set;
+
 import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
 import com.dogatech.nodewebkitwrapper.io.Outputter;
 
@@ -43,6 +45,14 @@ public class SoulSifterModelType extends CppType {
   public void outputUnwrap(String from, String to) {
     o.i().p("dogatech::soulsifter::" + name + "* " + to + "tmp(node::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject())->getNwcpValue());");
     o.i().p("dogatech::soulsifter::" + name + "& " + to + " = *" + to + "tmp;");
+  }
+
+  @Override
+  public Set<String> requiredHeaders() {
+    Set<String> s = super.requiredHeaders();
+    s.add(name + ".h");
+    s.add(name + "_wrap.h");
+    return s;
   }
 
   @Override

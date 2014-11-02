@@ -1,6 +1,8 @@
 package com.dogatech.nodewebkitwrapper.prototype.type;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
 import com.dogatech.nodewebkitwrapper.io.Outputter;
@@ -41,9 +43,12 @@ public abstract class CppType {
     o.i().p("/* not implemented */");
   }
 
-  public String[] requiredHeaders() {
-    // normally not needed
-    return new String[] {};
+  public Set<String> requiredHeaders() {
+    Set<String> s = new HashSet<String>();
+    for (CppType t : generics) {
+      s.addAll(t.requiredHeaders());
+    }
+    return s;
   }
 
   protected void init(String n, CppClass c, Outputter out) {

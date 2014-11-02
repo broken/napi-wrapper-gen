@@ -1,5 +1,7 @@
 package com.dogatech.nodewebkitwrapper.prototype.type;
 
+import java.util.Set;
+
 import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
 import com.dogatech.nodewebkitwrapper.io.Outputter;
 
@@ -33,7 +35,9 @@ public class ResultSetIteratorType extends CppType {
   }
 
   @Override
-  public String[] requiredHeaders() {
-    return new String[] { "ResultSetIterator.h" };
+  public Set<String> requiredHeaders() {
+    Set<String> s = super.requiredHeaders();
+    s.add("ResultSetIterator.h");
+    return s;
   }
 }

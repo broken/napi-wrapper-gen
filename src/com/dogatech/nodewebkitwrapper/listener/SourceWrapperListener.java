@@ -43,13 +43,9 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     SortedSet<String> headers = new TreeSet<String>();
     for (CppMethod m : cppClass.methods.values()) {
       if (m.broken) continue;
-      for (String h : m.returnType.requiredHeaders()) {
-        headers.add(h);
-      }
+      headers.addAll(m.returnType.requiredHeaders());
       for (CppType t : m.args) {
-        for (String h : t.requiredHeaders()) {
-          headers.add(h);
-        }
+        headers.addAll(t.requiredHeaders());
       }
     }
     for (String h : headers) {
