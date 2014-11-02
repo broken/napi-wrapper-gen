@@ -172,9 +172,8 @@ public class CppMethod {
     }
     @Override
     public void out() {
-      //o.i().p(cppClass.namespace + cppClass.name + "* " + cppClass.name.toLowerCase() + " =");
       o.p("");
-      o.i().p("  " + cppClass.namespace + cppClass.name + "::" + name + "(" + paramList(args) + ");");
+      o.i().p("    " + cppClass.namespace + cppClass.name + "::" + name + "(" + paramList(args) + ");");
       o.i().p("v8::Local<v8::Function> cons = NanNew<v8::Function>(constructor);");
       o.i().p("v8::Local<v8::Object> instance = cons->NewInstance();");
       o.p("");
@@ -201,9 +200,6 @@ public class CppMethod {
     @Override
     public void out() {
       o.i().p("obj->" + cppClass.name.toLowerCase() + "->" + name + "(" + paramList(args) + ");");
-      /*if (returnType.isUnknownType(cppClass)) {
-        o.i().p("if (result == NULL) NanReturnUndefined();");
-      }*/
     }
   }
 }
