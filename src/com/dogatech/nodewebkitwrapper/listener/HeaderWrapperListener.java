@@ -42,7 +42,7 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     o.i().p("static void Init(v8::Handle<v8::Object> exports);");
     o.i().p("static v8::Local<v8::Object> NewInstance();");
     o.p("");
-    o.i().p("void setNwcpValue(" + cppNamespace + cppClass.name + "* v, bool own) { " + cppClass.name.toLowerCase() + " = v; ownWrappedObject = own; }");
+    o.i().p("void setNwcpValue(" + cppNamespace + cppClass.name + "* v, bool own);");
     o.i().p(cppNamespace + cppClass.name + "* getNwcpValue() const { return " + cppClass.name.toLowerCase() + "; }");
     o.p("").decIndent();
     o.i().p(" private:").incIndent();
