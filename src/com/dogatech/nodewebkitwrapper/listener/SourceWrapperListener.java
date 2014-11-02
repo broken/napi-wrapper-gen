@@ -57,9 +57,9 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     o.p("");
     o.i().p("v8::Persistent<v8::Function> " + cppClass.name + "::constructor;");
     o.p("");
-    o.p(cppClass.name + "::" + cppClass.name + "() : ObjectWrap(), " + cppClass.name.toLowerCase() + "(" + cppClass.createNewPointer() + ") {};");
-    o.p(cppClass.name + "::" + cppClass.name + "(" + cppNamespace + cppClass.name + "* o) : ObjectWrap(), " + cppClass.name.toLowerCase() + "(o) {};");
-    o.p(cppClass.name + "::~" + cppClass.name + "() { delete " + cppClass.name.toLowerCase() + "; };");
+    o.p(cppClass.name + "::" + cppClass.name + "() : ObjectWrap(), " + cppClass.name.toLowerCase() + "(" + cppClass.createNewPointer() + "), ownWrappedObject(true) {};");
+    o.p(cppClass.name + "::" + cppClass.name + "(" + cppNamespace + cppClass.name + "* o) : ObjectWrap(), " + cppClass.name.toLowerCase() + "(o), ownWrappedObject(true) {};");
+    o.p(cppClass.name + "::~" + cppClass.name + "() { if (ownWrappedObject) delete " + cppClass.name.toLowerCase() + "; };");
     o.p("");
     o.i().p("NAN_METHOD(" + cppClass.name + "::New) {").incIndent();
     o.i().p("NanScope();");
