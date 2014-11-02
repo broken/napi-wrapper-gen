@@ -26,7 +26,7 @@ publicBlock: constructor | destructor | method | friend | opMethod ;
 constructor: EXPLICIT? Identifier parameterList SEMICOLON;
 destructor: '~' Identifier LPAREN RPAREN SEMICOLON;
 method: STATIC? type Identifier parameterList CONST? (block | SEMICOLON);
-friend: FRIEND Identifier SEMICOLON;
+friend: FRIEND CLASS? type SEMICOLON;
 opMethod: type ( OPEQ | OPLT | OPGT ) parameterList CONST? SEMICOLON ;
 
 parameterList: LPAREN (parameter (parameter)*)? RPAREN;
@@ -37,13 +37,17 @@ cppClass: CLASS Identifier LCBRACE classBlock RCBRACE SEMICOLON;
 block: LCBRACE innerBlock RCBRACE;
 innerBlock: (Identifier | SEMICOLON | block | type | STATIC) innerBlock;
 
-type: CONST? Identifier Modifier?;
+type: CONST? Identifier generic? Modifier*;
+generic: LT typeList GT;
+typeList: type (COMMA type)?;
 
 COMMA: ',' -> skip;
 LPAREN: '(';
 RPAREN: ')';
 LCBRACE: '{';
 RCBRACE: '}';
+LT: '<';
+GT: '>';
 SEMICOLON: ';';
 
 FRIEND: 'friend' ;
@@ -57,15 +61,13 @@ OPEQ: 'operator=' ;
 OPLT: 'operator<' ;
 OPGT: 'operator>' ;
 
-STAR: '*';
-AMPERSAND: '&';
+fragment STAR: '*';
+fragment AMPERSAND: '&';
 
 
 NamespacePrefix: IdentifierName '::' (NamespacePrefix)?;
-Identifier: NamespacePrefix? IdentifierName Generic? Modifier*;
+Identifier: NamespacePrefix? IdentifierName;
 fragment IdentifierName: Nondigit ( Nondigit | Digit )*;
-Generic: '<' TypeList '>';
-TypeList: Identifier (COMMA Identifier)?;
 
 Modifier: STAR | AMPERSAND;
 
@@ -97,3 +99,5 @@ LineComment: '//' ~[\r\n]*
 fragment Nondigit: [a-zA-Z_];
 fragment Digit: [0-9];
 
+Struct: 'struct ' .*? '};'
+    -> skip ;

@@ -1,5 +1,7 @@
 package com.dogatech.nodewebkitwrapper.prototype.type;
 
+import java.util.List;
+
 import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
 import com.dogatech.nodewebkitwrapper.io.Outputter;
 import com.dogatech.nodewebkitwrapper.prototype.CppClass;
@@ -11,6 +13,7 @@ public abstract class CppType {
   protected boolean isPointer;
   protected boolean isReference;
   public String name;
+  List<CppType> generics;
   protected CppClass cppClass;
   protected Outputter o;
 
@@ -54,9 +57,5 @@ public abstract class CppType {
 
   protected String nameSansRef() {
     return isReference ? name.substring(0, name.length()-1) : name;
-  }
-
-  public String getGeneric() {
-    return name.substring(name.indexOf("<") + 1, name.lastIndexOf(">"));
   }
 }

@@ -4,7 +4,7 @@ import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
 import com.dogatech.nodewebkitwrapper.io.Outputter;
 
 
-public class VectorType extends CppType {
+public class VectorType extends CppType { //TODO
 
   @Override
   public boolean isType(String name) {
@@ -13,7 +13,7 @@ public class VectorType extends CppType {
 
   @Override
   public void outputReturn() {
-    CppType generic = CppTypeFactory.instance().createType(getGeneric(), cppClass, o);
+    /*CppType generic = CppTypeFactory.instance().createType(getGeneric(), cppClass, o);
     o.i().p("v8::Handle<v8::Array> a = NanNew<v8::Array>((int) result" + (isPointer ? "->" : ".") + "size());");
     o.i().p("for (int i = 0; i < (int) result" + (isPointer ? "->" : ".") + "size(); i++) {").incIndent();
     o.i();
@@ -28,6 +28,6 @@ public class VectorType extends CppType {
     if (isPointer) o.i().p("  delete result;");
     o.i().p("NanReturnValue(a);");
 
-    o.i().p("NanReturnValue(NanNew<v8::String>(result.c_str(), result.length()));");
+    o.i().p("NanReturnValue(NanNew<v8::String>(result.c_str(), result.length()));");*/
   }
 }

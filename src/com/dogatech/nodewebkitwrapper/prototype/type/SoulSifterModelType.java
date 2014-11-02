@@ -21,7 +21,7 @@ public class SoulSifterModelType extends CppType {
 
   @Override
   public void outputResult() {
-    o.i().p((isConst ? "const " : "") + "dogatech::soulsifter::" + nameSansRef() + " result =", false);
+    o.i().p((isConst ? "const " : "") + "dogatech::soulsifter::" + nameSansRef() + "* result =", false);
   }
 
   @Override
@@ -34,27 +34,19 @@ public class SoulSifterModelType extends CppType {
 
   @Override
   public void outputWrap(String var) {
-    o.i().p("v8::Local<v8::Object> instance = " + cleanName() + "::NewInstance();");
-    o.i().p(name + " r = ObjectWrap::Unwrap<" + cleanName() + ">(instance);");
-    o.i().p("r->setNwcpValue(" + var + ", " + (cleanName().equals(cppClass.name) ? "true);" : "false);"));
+    o.i().p("v8::Local<v8::Object> instance = " + name + "::NewInstance();");
+    o.i().p(name + "* r = ObjectWrap::Unwrap<" + name + ">(instance);");
+    o.i().p("r->setNwcpValue(" + var + ", " + (name.equals(cppClass.name) ? "true);" : "false);"));
   }
 
   @Override
   public void outputUnwrap(String from, String to) {
-    if (name.endsWith("*")) {
-      o.i().p("dogatech::soulsifter::" + name + " " + to + "(node::ObjectWrap::Unwrap<" + cleanName() + ">(" + from + "->ToObject())->getNwcpValue())" + (isReference ? "*" : "") + ";");
-    } else {
-      o.i().p("dogatech::soulsifter::" + cleanName() + "* " + to + "tmp(node::ObjectWrap::Unwrap<" + cleanName() + ">(" + from + "->ToObject())->getNwcpValue());");
-      o.i().p("dogatech::soulsifter::" + cleanName() + "& " + to + " = " + to + "tmp;");
-    }
+    o.i().p("dogatech::soulsifter::" + name + "* " + to + "tmp(node::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject())->getNwcpValue());");
+    o.i().p("dogatech::soulsifter::" + name + "& " + to + " = " + to + "tmp*;");
   }
 
   @Override
   public String[] requiredHeaders() {
-    return new String[] { cleanName() + ".h", cleanName() + "_wrap.h" };
-  }
-
-  private String cleanName() {
-    return name.replaceAll("(\\*|&)", "");
+    return new String[] { name + ".h", name + "_wrap.h" };
   }
 }
