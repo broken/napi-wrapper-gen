@@ -23,7 +23,7 @@ public class SoulSifterModelType extends CppType {
 
   @Override
   public void outputResult() {
-    o.i().p((isConst ? "const " : "") + "dogatech::soulsifter::" + nameSansRef() + "* result =", false);
+    o.i().p((isConst ? "const " : "") + fullName() + "* result =", false);
   }
 
   @Override
@@ -36,15 +36,24 @@ public class SoulSifterModelType extends CppType {
 
   @Override
   public void outputWrap(String var) {
+    outputWrap(var, name.equals(cppClass.name));
+  }
+
+  @Override
+  public void outputWrap(String var, boolean own) {
     o.i().p("v8::Local<v8::Object> instance = " + name + "::NewInstance();");
     o.i().p(name + "* r = ObjectWrap::Unwrap<" + name + ">(instance);");
-    o.i().p("r->setNwcpValue(" + var + ", " + (name.equals(cppClass.name) ? "true);" : "false);"));
+    o.i().p("r->setNwcpValue(" + var + ", " + String.valueOf(own) + ");");
   }
 
   @Override
   public void outputUnwrap(String from, String to) {
-    o.i().p("dogatech::soulsifter::" + name + "* " + to + "tmp(node::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject())->getNwcpValue());");
-    o.i().p("dogatech::soulsifter::" + name + "& " + to + " = *" + to + "tmp;");
+    if (isPointer()) {
+      o.i().p(fullName() + "* " + to + "(node::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject())->getNwcpValue());");
+    } else {
+      o.i().p(fullName() + "* " + to + "tmp(node::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject())->getNwcpValue());");
+      o.i().p(fullName() + "& " + to + " = *" + to + "tmp;");
+    }
   }
 
   @Override
@@ -56,7 +65,7 @@ public class SoulSifterModelType extends CppType {
   }
 
   @Override
-  public String[] requiredHeaders() {
-    return new String[] { name + ".h", name + "_wrap.h" };
+  public String fullName() {
+    return "dogatech::soulsifter::" + name;
   }
 }

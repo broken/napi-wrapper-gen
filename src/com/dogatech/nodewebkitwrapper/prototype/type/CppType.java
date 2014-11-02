@@ -1,5 +1,6 @@
 package com.dogatech.nodewebkitwrapper.prototype.type;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,19 +13,23 @@ import com.dogatech.nodewebkitwrapper.prototype.CppMethod;
 
 public abstract class CppType {
   protected boolean isConst;
-  protected boolean isPointer;
-  protected boolean isReference;
   public String name;
-  List<CppType> generics;
+  List<CppType> generics = new ArrayList<CppType>();
+  List<String> modifiers = new ArrayList<String>();
   protected CppClass cppClass;
   protected Outputter o;
 
   /** Returns true if this object can handle the given type string */
   public abstract boolean isType(String name);
 
+  /** Returns true if this object can handle the given type string */
+  public boolean isType(nodewebkitwrapperParser.TypeContext ctx) {
+    return isType(ctx.Identifier().toString());
+  }
+
   /** Writes to the Outputter how this object should be returned from a call. */
   public void outputResult() {
-    o.i().p((isConst ? "const " : "") + nameSansRef() + " result =", false);
+    o.i().p((isConst ? "const " : "") + name + " result =", false);
   }
 
   /** Writes to the Outputter how this type should be wrapped are returned. */
@@ -39,6 +44,10 @@ public abstract class CppType {
     o.p("/* not implemented */", false);
   }
 
+  public void outputWrap(String var, boolean own) {
+    outputWrap(var);
+  }
+
   public void outputUnwrap(String from, String to) {
     o.i().p("/* not implemented */");
   }
@@ -51,16 +60,21 @@ public abstract class CppType {
     return s;
   }
 
+  public String fullName() {
+    return name;
+  }
+
+  public boolean isPointer() {
+    return modifiers.size() > 0 && modifiers.get(0).equals("*");
+  }
+
+  public boolean isReference() {
+    return modifiers.size() > 0 && modifiers.get(0).equals("&");
+  }
+
   protected void init(String n, CppClass c, Outputter out) {
     cppClass = c;
     name = n;
-    isPointer = name.charAt(name.length() - 1) == '*';
-    isReference = name.charAt(name.length() - 1) == '&';
-
     o = out;
-  }
-
-  protected String nameSansRef() {
-    return isReference ? name.substring(0, name.length()-1) : name;
   }
 }
