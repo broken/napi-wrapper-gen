@@ -32,10 +32,10 @@ ant all
 
 Sample output
 -------------
-You can view the _*_wrap_ file output of this program in my SoulSifter project.
+You can view the output of this program by checking out the _*_wrap_ files in my SoulSifter project.
 https://github.com/broken/soulsifter/tree/master/src/soulsifter
 
 
-Test grammar (out of date)
+Test grammar
 ------------
-antlr4 nodewebkitwrapper.g4 && javac nodewebkitwrapper*.java && grun nodewebkitwrapper header -gui < __file.h__
+ant -Dfile=__file.h__ gui

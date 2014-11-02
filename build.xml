@@ -58,4 +58,19 @@
     <antcall target="run"/>
   </target>
 
+  <target name="gui">
+    <antcall target="clean"/>
+    <antcall target="antlr"/>
+    <antcall target="compile"/>
+    <exec executable="java">
+      <arg value="-classpath"/>
+      <arg value="${classpath}:${classes.dir}"/>
+      <arg value="org.antlr.v4.runtime.misc.TestRig"/>
+      <arg value="com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapper"/>
+      <arg value="header"/>
+      <arg value="-gui"/>
+      <redirector input="${file}"/>
+    </exec>
+  </target>
+
 </project>
