@@ -13,6 +13,7 @@ public class SoulSifterWrapperTool {
       "resources/BasicGenre.h",
       "resources/Mix.h",
       "resources/Playlist.h",
+      "resources/PlaylistEntry.h",
       "resources/SearchUtil.h",
       "resources/Song.h",
       "resources/Style.h"
