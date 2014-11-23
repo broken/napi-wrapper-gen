@@ -27,8 +27,15 @@ public class VectorType extends CppType { //TODO
   public void outputReturn() {
     o.i().p("v8::Handle<v8::Array> a = NanNew<v8::Array>((int) result" + (isPointer() ? "->" : ".") + "size());");
     o.i().p("for (int i = 0; i < (int) result" + (isPointer() ? "->" : ".") + "size(); i++) {").incIndent();
-    generics.get(0).outputWrap("(" + (isPointer() ? "*" : "") + "result)[i]", !isReference());
-    o.i().p("a->Set(NanNew<v8::Number>(i), instance);").decIndent();
+    CppType t = generics.get(0);
+    if (t instanceof SoulSifterModelType) {  // TODO should be generic model
+      t.outputWrap("(" + (isPointer() ? "*" : "") + "result)[i]", !isReference());
+      o.i().p("a->Set(NanNew<v8::Number>(i), instance);").decIndent();
+    } else {
+      o.i().p("a->Set(NanNew<v8::Number>(i), ", false);
+      t.outputWrap((isPointer() ? "*" : "") + "result[i]");
+      o.p(");").decIndent();
+    }
     o.i().p("}");
     if (isPointer()) o.i().p("delete result;");
     o.i().p("NanReturnValue(a);");
