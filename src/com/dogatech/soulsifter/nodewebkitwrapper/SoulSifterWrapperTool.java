@@ -7,6 +7,7 @@ import com.dogatech.nodewebkitwrapper.WrapperTool;
 
 public class SoulSifterWrapperTool {
   private static String[] files = {
+      // models
       "resources/Album.h",
       "resources/AlbumPart.h",
       "resources/AudioAnalyzer.h",
@@ -16,7 +17,9 @@ public class SoulSifterWrapperTool {
       "resources/PlaylistEntry.h",
       "resources/SearchUtil.h",
       "resources/Song.h",
-      "resources/Style.h"
+      "resources/Style.h",
+      // services
+      "resources/NewSongManager.h"
   };
 
   public static void main(String[] args) throws Exception {
