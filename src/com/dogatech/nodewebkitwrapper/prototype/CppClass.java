@@ -21,15 +21,7 @@ public class CppClass {
   }
 
   public String createNewPointer() {
-    boolean isSingleton = false;
-    for (CppMethod m : methods.values()) {
-      if (m.name.equals("getInstance")) {
-        isSingleton = true;
-        break;
-      }
-    }
-
-    return isSingleton ? "&(" + namespace + name + "::getInstance())"
+    return isSingleton() ? "&(" + namespace + name + "::getInstance())"
                        : "new " + namespace + name + "()";
   }
 
@@ -37,5 +29,16 @@ public class CppClass {
     if (methods.get(m.name) == null) methods.put(m.name, m);
     if (m.isGetter) getters.add(m.accessor());
     if (m.isSetter) setters.add(m.accessor());
+  }
+
+  public boolean isSingleton() {
+    boolean isSingleton = false;
+    for (CppMethod m : methods.values()) {
+      if (m.name.equals("getInstance")) {
+        isSingleton = true;
+        break;
+      }
+    }
+    return isSingleton;
   }
 }

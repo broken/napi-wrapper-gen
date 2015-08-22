@@ -68,7 +68,20 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     o.i().p("NAN_METHOD(" + cppClass.name + "::New) {").incIndent();
     o.i().p("NanScope();");
     o.p("");
-    o.i().p("" + cppClass.name + "* obj = new " + cppClass.name + "(" + cppClass.createNewPointer() + ");");
+    o.i().p("" + cppClass.namespace + cppClass.name + "* wrappedObj = NULL;");
+    if (cppClass.isSingleton()) {
+      o.i().p("" + cppClass.name + "* obj = new " + cppClass.name + "(" + cppClass.createNewPointer() + ");");
+    } else {
+      o.i().p("if (args.Length()) {").incIndent();
+      o.i().p("" + cppClass.namespace + cppClass.name + "* xtmp(node::ObjectWrap::Unwrap<" + cppClass.name + ">(args[0]->ToObject())->getNwcpValue());");
+      o.i().p("" + cppClass.namespace + cppClass.name + "& x = *xtmp;");
+      o.i().p("wrappedObj = new " + cppClass.namespace + cppClass.name + "(x);");
+      o.decIndent().i().p("} else {").incIndent();
+      o.i().p("wrappedObj = " + cppClass.createNewPointer() + ";");
+      o.decIndent().i().p("}");
+      o.p("");
+      o.i().p("" + cppClass.name + "* obj = new " + cppClass.name + "(wrappedObj);");
+    }
     o.i().p("obj->Wrap(args.This());");
     o.p("");
     o.i().p("NanReturnValue(args.This());");
