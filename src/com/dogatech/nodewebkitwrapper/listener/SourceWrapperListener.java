@@ -68,10 +68,10 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     o.i().p("NAN_METHOD(" + cppClass.name + "::New) {").incIndent();
     o.i().p("NanScope();");
     o.p("");
-    o.i().p("" + cppClass.namespace + cppClass.name + "* wrappedObj = NULL;");
-    if (cppClass.isSingleton()) {
+    if (cppClass.isSingleton() || !cppClass.hasCopyCtor) {
       o.i().p("" + cppClass.name + "* obj = new " + cppClass.name + "(" + cppClass.createNewPointer() + ");");
     } else {
+      o.i().p("" + cppClass.namespace + cppClass.name + "* wrappedObj = NULL;");
       o.i().p("if (args.Length()) {").incIndent();
       o.i().p("" + cppClass.namespace + cppClass.name + "* xtmp(node::ObjectWrap::Unwrap<" + cppClass.name + ">(args[0]->ToObject())->getNwcpValue());");
       o.i().p("" + cppClass.namespace + cppClass.name + "& x = *xtmp;");
@@ -112,6 +112,12 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     o.p("");
     for (CppMethod m : cppClass.methods.values()) {
       m.outputSource(cppNamespace.toString(), cppClass);
+    }
+  }
+
+  @Override public void enterConstructor(@NotNull nodewebkitwrapperParser.ConstructorContext ctx) {
+    if (ctx.parameterList().parameter().size() == 1 && ctx.parameterList().parameter().get(0).type().Identifier().toString().equals(cppClass.name)) {
+      cppClass.hasCopyCtor = true;
     }
   }
 

@@ -14,6 +14,7 @@ public class CppClass {
   public Map<String, CppMethod> methods = new LinkedHashMap<String, CppMethod>();
   Set<String> getters = new HashSet<String>();
   Set<String> setters = new HashSet<String>();
+  public boolean hasCopyCtor = false;
 
   public CppClass(CppNamespace ns, nodewebkitwrapperParser.CppClassContext ctx) {
     name = ctx.Identifier().toString();
