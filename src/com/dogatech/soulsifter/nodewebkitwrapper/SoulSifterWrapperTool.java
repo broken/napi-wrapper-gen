@@ -15,11 +15,12 @@ public class SoulSifterWrapperTool {
       "resources/Mix.h",
       "resources/Playlist.h",
       "resources/PlaylistEntry.h",
-      "resources/SearchUtil.h",
       "resources/Song.h",
       "resources/Style.h",
       // services
-      "resources/NewSongManager.h"
+      "resources/NewSongManager.h",
+      "resources/SearchUtil.h",
+      "resources/TagService.h",
   };
 
   public static void main(String[] args) throws Exception {
