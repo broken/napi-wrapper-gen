@@ -18,6 +18,7 @@ public class CppTypeFactory {
     new ResultSetIteratorType(),
     new SoulSifterModelType(),
     new VectorType(),
+    new SetType(),
     new BooleanType(),
     new NumberType(),
     new StringType(),
