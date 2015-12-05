@@ -16,6 +16,7 @@ public class SoulSifterModelType extends CppType {
             name.startsWith("BasicGenre") ||
             name.startsWith("Mix") ||
             name.startsWith("MusicManager") ||
+            name.startsWith("MusicVideo") ||
             name.startsWith("Playlist") ||
             name.startsWith("PlaylistEntry") ||
             name.startsWith("SearchUtil") ||
