@@ -37,9 +37,9 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     o.i().p("#include <nan.h>");
     o.i().p("#include \"" + cppClass.name + ".h\"");
     o.p("");
-    o.i().p("class " + cppClass.name + " : public node::ObjectWrap {");
+    o.i().p("class " + cppClass.name + " : public Nan::ObjectWrap {");
     o.i().p(" public:").incIndent();
-    o.i().p("static void Init(v8::Handle<v8::Object> exports);");
+    o.i().p("static void Init(v8::Local<v8::Object> exports);");
     o.i().p("static v8::Local<v8::Object> NewInstance();");
     o.p("");
     o.i().p("void setNwcpValue(" + cppNamespace + cppClass.name + "* v, bool own);");
@@ -50,13 +50,13 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     o.i().p("explicit " + cppClass.name + "(" + cppNamespace + cppClass.name + "* " + cppClass.name.toLowerCase() + ");");
     o.i().p("~" + cppClass.name + "();");
     o.p("");
-    o.i().p("static NAN_METHOD(New);");
+    o.i().p("static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);");
     o.p("");
     for (CppMethod m : cppClass.methods.values()) {
       m.outputHeader();
     }
     o.p("");
-    o.i().p("static v8::Persistent<v8::Function> constructor;");
+    o.i().p("static Nan::Persistent<v8::Function> constructor;");
     o.i().p(cppNamespace + cppClass.name + "* " + cppClass.name.toLowerCase() + ";");
     o.i().p("bool ownWrappedObject;");
     o.decIndent();

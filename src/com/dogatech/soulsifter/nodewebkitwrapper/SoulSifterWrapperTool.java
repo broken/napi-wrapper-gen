@@ -22,6 +22,7 @@ public class SoulSifterWrapperTool {
       "resources/MusicVideoService.h",
       "resources/NewSongManager.h",
       "resources/SearchUtil.h",
+      // "resources/SoulSifterSettings.h",  // manual b/c it uses templates
       "resources/TagService.h",
   };
 

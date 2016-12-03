@@ -12,12 +12,12 @@ public class NumberType extends CppType {
   }
 
   @Override
-  public void outputWrap(String var) {
-    o.p("NanNew<v8::Number>(" + var + ")", false);
+  public String v8Type() {
+    return "v8::Number";
   }
 
   @Override
   public void outputUnwrap(String from, String to) {
-    o.i().p("int " + to + "(" + from + "->Uint32Value());");
+    o.i().p("int " + to + "(" + from + "->NumberValue());");
   }
 }

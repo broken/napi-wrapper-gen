@@ -64,18 +64,22 @@ public class CppMethod {
       o.i().p("// Unable to process " + name);
       return;
     }
-    o.i().p("static " + type.nanMethod() + "(" + name + ");");
+    if (isGetter) {
+      o.i().p("static void " + name + "(v8::Local<v8::String> property, const Nan::PropertyCallbackInfo<v8::Value>& info);");
+    } else if (isSetter) {
+      o.i().p("static void " + name + "(v8::Local<v8::String> property, v8::Local<v8::Value> value, const Nan::PropertyCallbackInfo<void>& info);");
+    } else {
+      o.i().p("static void " + name + "(const Nan::FunctionCallbackInfo<v8::Value>& info);");
+    }
   }
 
   public void outputSource(String namespace, CppClass cppClass) {
     if (broken) return;
     type.out();
-    o.i().p("NanScope();");
-    o.p("");
     if (!isStatic)
-      o.i().p(cppClass.name + "* obj = ObjectWrap::Unwrap<" + cppClass.name + ">(args.This());");
+      o.i().p(cppClass.name + "* obj = Nan::ObjectWrap::Unwrap<" + cppClass.name + ">(info.Holder());");
     for (int i = 0; i < args.size(); ++i) {
-      String arg = type instanceof MtSetter ? "value" : "args[" + i + "]";
+      String arg = type instanceof MtSetter ? "value" : "info[" + i + "]";
       args.get(i).outputUnwrap(arg, "a" + i);
     }
     returnType.outputResult();
@@ -92,12 +96,12 @@ public class CppMethod {
       return;
     }
     if (isStatic) {
-      o.i().p("NanSetTemplate(tpl, \"" + name + "\", NanNew<v8::FunctionTemplate>(" + name + ")->GetFunction());");
+      o.i().p("Nan::SetMethod(tpl, \"" + name + "\", " + name + ");");
     } else if (!isGetter && !isSetter) {
-      o.i().p("NanSetPrototypeTemplate(tpl, \"" + name + "\", NanNew<v8::FunctionTemplate>(" + name + ")->GetFunction());");
+      o.i().p("Nan::SetPrototypeMethod(tpl, \"" + name + "\", " + name + ");");
     } else {
       if (isGetter) {
-        o.i().p("tpl->InstanceTemplate()->SetAccessor(NanNew<v8::String>(\"" + accessor() + "\"), " + name, false);
+        o.i().p("Nan::SetAccessor(tpl->InstanceTemplate(), Nan::New<v8::String>(\"" + accessor() + "\").ToLocalChecked(), " + name, false);
         if (cppClass.setters.contains(accessor())) {  // TODO check if setter is broken
           o.p(", " + "s" + name.substring(1) + ");");
         } else {
@@ -118,7 +122,11 @@ public class CppMethod {
     public abstract String nanMethod();
     @Override
     public void out() {
-      o.p(nanMethod() + "(" + cppClass.name + "::" + name + ") {").incIndent();
+      if (isGetter || isSetter) {
+        o.p(nanMethod() + "(" + cppClass.name + "::" + name + ") {").incIndent();
+      } else {
+        o.p("void " + cppClass.name + "::" + name + "(const Nan::FunctionCallbackInfo<v8::Value>& info) {").incIndent();
+      }
     }
   }
   private class MtGetter extends MethodType {
@@ -174,10 +182,10 @@ public class CppMethod {
     public void out() {
       o.p("");
       o.i().p("    " + cppClass.namespace + cppClass.name + "::" + name + "(" + paramList(args) + ");");
-      o.i().p("v8::Local<v8::Function> cons = NanNew<v8::Function>(constructor);");
+      o.i().p("v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);");
       o.i().p("v8::Local<v8::Object> instance = cons->NewInstance();");
       o.p("");
-      o.i().p(cppClass.name + "* obj = ObjectWrap::Unwrap<" + cppClass.name + ">(instance);");
+      o.i().p(cppClass.name + "* obj = Nan::ObjectWrap::Unwrap<" + cppClass.name + ">(instance);");
       o.i().p("obj->" + cppClass.name.toLowerCase() + " = result;");
     }
   }

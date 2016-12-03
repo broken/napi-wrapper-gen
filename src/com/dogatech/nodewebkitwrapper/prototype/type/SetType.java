@@ -14,23 +14,28 @@ public class SetType extends VectorType {
   }
 
   @Override
+  public String v8Type() {
+    return "v8::Array";
+  }
+
+  @Override
   public void outputReturn() {  // TODO make this default for vector as well
-    o.i().p("v8::Handle<v8::Array> a = NanNew<v8::Array>((int) result" + (isPointer() ? "->" : ".") + "size());");
+    o.i().p("v8::Local<v8::Array> a = Nan::New<v8::Array>((int) result" + (isPointer() ? "->" : ".") + "size());");
     o.i().p("int idx = 0;");
     o.i().p("for (const auto& element : " + (isPointer() ? "*" : "") + "result) {").incIndent();
     CppType t = generics.get(0);
     if (t instanceof SoulSifterModelType) {  // TODO should be generic model
       t.outputWrap("element", !isReference());
-      o.i().p("a->Set(NanNew<v8::Number>(idx), instance);");
+      o.i().p("a->Set(Nan::New<v8::Number>(idx), instance);");
     } else {
-      o.i().p("a->Set(NanNew<v8::Number>(idx), ", false);
+      o.i().p("a->Set(Nan::New<v8::Number>(idx), ", false);
       t.outputWrap("element");
       o.p(");");
     }
     o.i().p("++idx;").decIndent();
     o.i().p("}");
     if (isPointer()) o.i().p("delete result;");  // TODO returning pointers should not be giving ownership
-    o.i().p("NanReturnValue(a);");
+    o.i().p("info.GetReturnValue().Set(a);");
   }
 
   @Override

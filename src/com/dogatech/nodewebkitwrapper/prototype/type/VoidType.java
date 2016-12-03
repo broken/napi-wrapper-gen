@@ -12,11 +12,16 @@ public class VoidType extends CppType {
   }
 
   @Override
+  public String v8Type() {
+    return "v8::Boolean";
+  }
+
+  @Override
   public void outputResult() {
   }
 
   @Override
   public void outputReturn() {
-    o.i().p("NanReturnUndefined();");
+    o.i().p("info.GetReturnValue().SetUndefined();");
   }
 }

@@ -22,6 +22,9 @@ public abstract class CppType {
   /** Returns true if this object can handle the given type string */
   public abstract boolean isType(String name);
 
+  /** Returns the v8 type name of this type */
+  public abstract String v8Type();
+
   /** Returns true if this object can handle the given type string */
   public boolean isType(nodewebkitwrapperParser.TypeContext ctx) {
     return isType(ctx.Identifier().toString());
@@ -34,14 +37,14 @@ public abstract class CppType {
 
   /** Writes to the Outputter how this type should be wrapped are returned. */
   public void outputReturn() {
-    o.i().p("NanReturnValue(", false);
+    o.i().p("info.GetReturnValue().Set(", false);
     outputWrap("result");
     o.p(");");
   }
 
   /** Returns a string for how this object is wrapped. */
   public void outputWrap(String var) {
-    o.p("/* not implemented */", false);
+    o.p("Nan::New<" + v8Type() + ">(" + var + ")", false);
   }
 
   public void outputWrap(String var, boolean own) {

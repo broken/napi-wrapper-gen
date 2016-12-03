@@ -25,16 +25,24 @@ public class SoulSifterModelType extends CppType {
   }
 
   @Override
+  public String v8Type() {
+    return "v8::Object";
+  }
+
+  @Override
   public void outputResult() {
     o.i().p((isConst ? "const " : "") + fullName() + "* result =", false);
   }
 
   @Override
   public void outputReturn() {
-    o.i().p("if (result == NULL) NanReturnUndefined();");
+    o.i().p("if (result == NULL) {").incIndent();
+    o.i().p("info.GetReturnValue().SetNull();");
+    o.decIndent().i().p("} else {").incIndent();
     outputWrap("result");
     o.p("");
-    o.i().p("NanReturnValue(instance);");
+    o.i().p("info.GetReturnValue().Set(instance);");
+    o.decIndent().i().p("}");
   }
 
   @Override
@@ -45,16 +53,16 @@ public class SoulSifterModelType extends CppType {
   @Override
   public void outputWrap(String var, boolean own) {
     o.i().p("v8::Local<v8::Object> instance = " + name + "::NewInstance();");
-    o.i().p(name + "* r = ObjectWrap::Unwrap<" + name + ">(instance);");
+    o.i().p(name + "* r = Nan::ObjectWrap::Unwrap<" + name + ">(instance);");
     o.i().p("r->setNwcpValue(" + var + ", " + String.valueOf(own) + ");");
   }
 
   @Override
   public void outputUnwrap(String from, String to) {
     if (isPointer()) {
-      o.i().p(fullName() + "* " + to + "(node::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject())->getNwcpValue());");
+      o.i().p(fullName() + "* " + to + "(Nan::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject())->getNwcpValue());");
     } else {
-      o.i().p(fullName() + "* " + to + "tmp(node::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject())->getNwcpValue());");
+      o.i().p(fullName() + "* " + to + "tmp(Nan::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject())->getNwcpValue());");
       o.i().p(fullName() + "& " + to + " = *" + to + "tmp;");
     }
   }

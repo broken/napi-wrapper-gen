@@ -6,10 +6,14 @@ I went looking for a tool like this, but to my surprise, it hasn't been built ye
 
 Requirements
 ------------
+* java (jdk)
 * node-webkit
 * nw-gyp
-* nan
+* nan (v2+)
 * ant
+* antlr
+
+* create a shortlink to your files to convert. Example: ln -s ../soulsifter/src/soulsifter resources
 
 
 Dislaimer Section

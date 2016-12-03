@@ -12,8 +12,8 @@ public class BooleanType extends CppType {
   }
 
   @Override
-  public void outputWrap(String var) {
-    o.p("NanNew<v8::Boolean>(" + var + ")", false);
+  public String v8Type() {
+    return "v8::Boolean";
   }
 
   @Override

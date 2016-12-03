@@ -12,12 +12,17 @@ public class TimeTType extends CppType {
   }
 
   @Override
+  public String v8Type() {
+    return "v8::Number";
+  }
+
+  @Override
   public void outputWrap(String var) {
-    o.p("NanNew<v8::Number>(" + var + " * 1000)", false);
+    o.p("Nan::New<v8::Number>(" + var + " * 1000)", false);
   }
 
   @Override
   public void outputUnwrap(String from, String to) {
-    o.i().p("time_t " + to + "(" + from + "->Uint32Value() / 1000);");
+    o.i().p("time_t " + to + "(" + from + "->NumberValue() / 1000);");
   }
 }
