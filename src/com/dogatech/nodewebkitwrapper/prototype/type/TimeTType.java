@@ -13,7 +13,7 @@ public class TimeTType extends CppType {
 
   @Override
   public String v8Type() {
-    return "v8::Number";
+    return "v8::Integer";
   }
 
   @Override
@@ -23,6 +23,6 @@ public class TimeTType extends CppType {
 
   @Override
   public void outputUnwrap(String from, String to) {
-    o.i().p("time_t " + to + "(" + from + "->NumberValue() / 1000);");
+    o.i().p("time_t " + to + "(" + from + "->IntegerValue() / 1000);");
   }
 }

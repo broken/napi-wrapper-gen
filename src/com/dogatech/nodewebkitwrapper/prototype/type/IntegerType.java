@@ -4,7 +4,7 @@ import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
 import com.dogatech.nodewebkitwrapper.io.Outputter;
 
 
-public class NumberType extends CppType {
+public class IntegerType extends CppType {
 
   @Override
   public boolean isType(String name) {
@@ -13,11 +13,11 @@ public class NumberType extends CppType {
 
   @Override
   public String v8Type() {
-    return "v8::Number";
+    return "v8::Integer";
   }
 
   @Override
   public void outputUnwrap(String from, String to) {
-    o.i().p("int " + to + "(" + from + "->NumberValue());");
+    o.i().p("int " + to + "(" + from + "->IntegerValue());");
   }
 }

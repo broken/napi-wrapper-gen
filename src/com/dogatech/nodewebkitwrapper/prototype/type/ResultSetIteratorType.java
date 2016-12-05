@@ -36,7 +36,6 @@ public class ResultSetIteratorType extends CppType {
     o.i().p("a->Set(Nan::New<v8::Number>(i), instance);").decIndent();
     o.i().p("}");
     o.i().p("delete v;");
-    o.i().p("");
     o.i().p("info.GetReturnValue().Set(a);");
   }
 

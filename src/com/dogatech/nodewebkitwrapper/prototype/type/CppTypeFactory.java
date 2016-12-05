@@ -20,7 +20,7 @@ public class CppTypeFactory {
     new VectorType(),
     new SetType(),
     new BooleanType(),
-    new NumberType(),
+    new IntegerType(),
     new StringType(),
     new TimeTType()
   };
