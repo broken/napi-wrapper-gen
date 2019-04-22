@@ -24,8 +24,8 @@ classBlock: publicBlock* ;
 publicBlock: constructor | destructor | method | friend | opMethod ;
 
 constructor: EXPLICIT? Identifier parameterList SEMICOLON;
-destructor: '~' Identifier LPAREN RPAREN SEMICOLON;
-method: STATIC? type Identifier parameterList CONST? (block | SEMICOLON);
+destructor: VIRTUAL? '~' Identifier LPAREN RPAREN SEMICOLON;
+method: STATIC? VIRTUAL? type Identifier parameterList CONST? (block | SEMICOLON);
 friend: FRIEND CLASS? type SEMICOLON;
 opMethod: type ( OPEQ | OPLT | OPGT ) parameterList CONST? SEMICOLON ;
 
@@ -57,6 +57,7 @@ CLASS: 'class' ;
 CONST: 'const' ;
 EXPLICIT: 'explicit' ;
 STATIC: 'static' ;
+VIRTUAL: 'virtual' ;
 OPEQ: 'operator=' ;
 OPLT: 'operator<' ;
 OPGT: 'operator>' ;
@@ -74,6 +75,9 @@ Modifier: STAR | AMPERSAND;
 
 
 PrivateBlock: 'private:' ~['}']*
+    -> skip ;
+
+ProtectedBlock: 'protected:' ~['}']*
     -> skip ;
 
 Public: 'public:'
