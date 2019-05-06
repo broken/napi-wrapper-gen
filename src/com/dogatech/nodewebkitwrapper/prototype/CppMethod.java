@@ -183,7 +183,7 @@ public class CppMethod {
       o.p("");
       o.i().p("    " + cppClass.namespace + cppClass.name + "::" + name + "(" + paramList(args) + ");");
       o.i().p("v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);");
-      o.i().p("v8::Local<v8::Object> instance = cons->NewInstance();");
+      o.i().p("v8::Local<v8::Object> instance = Nan::NewInstance(cons).ToLocalChecked();");
       o.p("");
       o.i().p(cppClass.name + "* obj = Nan::ObjectWrap::Unwrap<" + cppClass.name + ">(instance);");
       o.i().p("obj->" + cppClass.name.toLowerCase() + " = result;");
