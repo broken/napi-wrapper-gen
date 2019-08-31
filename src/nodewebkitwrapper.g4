@@ -30,7 +30,7 @@ friend: FRIEND CLASS? type SEMICOLON;
 opMethod: type ( OPEQ | OPLT | OPGT ) parameterList CONST? SEMICOLON ;
 
 parameterList: LPAREN (parameter (parameter)*)? RPAREN;
-parameter: type Identifier;
+parameter: type Identifier (EQUALS Identifier)?;
 
 cppClass: CLASS Identifier LCBRACE classBlock RCBRACE SEMICOLON;
 
@@ -49,6 +49,7 @@ RCBRACE: '}';
 LT: '<';
 GT: '>';
 SEMICOLON: ';';
+EQUALS: '=';
 
 FRIEND: 'friend' ;
 NAMESPACE: 'namespace' ;
