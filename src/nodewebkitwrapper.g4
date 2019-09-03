@@ -9,6 +9,7 @@ header: body;
 body
   :  namespace body
   |  classDeclaration body
+  |  enumDeclaration body
   |  usingDeclaration body
   |  cppClass
   |
@@ -16,6 +17,7 @@ body
 
 namespace: NAMESPACE Identifier LCBRACE body RCBRACE;
 classDeclaration: CLASS Identifier SEMICOLON;
+enumDeclaration: ENUM Identifier LCBRACE (Identifier)* RCBRACE SEMICOLON;
 
 usingDeclaration: USING NAMESPACE Identifier SEMICOLON;
 
@@ -56,6 +58,7 @@ NAMESPACE: 'namespace' ;
 USING: 'using' ;
 CLASS: 'class' ;
 CONST: 'const' ;
+ENUM: 'enum';
 EXPLICIT: 'explicit' ;
 STATIC: 'static' ;
 VIRTUAL: 'virtual' ;
