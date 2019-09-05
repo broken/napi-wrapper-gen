@@ -21,6 +21,7 @@ public class CppTypeFactory {
     new SetType(),
     new BooleanType(),
     new IntegerType(),
+    new NumberType(),
     new StringType(),
     new TimeTType()
   };

@@ -10,7 +10,7 @@ public class VectorType extends CppType { //TODO
 
   @Override
   public boolean isType(String name) {
-    return name.startsWith("vector");
+    return name.startsWith("vector") || name.startsWith("std::vector");
   }
 
   @Override
