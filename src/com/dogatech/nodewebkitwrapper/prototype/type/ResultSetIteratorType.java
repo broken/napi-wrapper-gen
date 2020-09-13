@@ -33,7 +33,7 @@ public class ResultSetIteratorType extends CppType {
     o.i().p("v8::Local<v8::Object> instance = Nan::NewInstance(cons).ToLocalChecked();");
     o.i().p(generic + "* o = Nan::ObjectWrap::Unwrap<" + generic + ">(instance);");
     o.i().p("o->" + cppClass.name.toLowerCase() + " = (*v)[i];");
-    o.i().p("a->Set(Nan::New<v8::Number>(i), instance);").decIndent();
+    o.i().p("a->Set(Nan::GetCurrentContext(), Nan::New<v8::Number>(i), instance);").decIndent();
     o.i().p("}");
     o.i().p("delete v;");
     o.i().p("info.GetReturnValue().Set(a);");

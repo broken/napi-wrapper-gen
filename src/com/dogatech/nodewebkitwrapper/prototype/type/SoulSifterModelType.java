@@ -60,9 +60,9 @@ public class SoulSifterModelType extends CppType {
   @Override
   public void outputUnwrap(String from, String to) {
     if (isPointer()) {
-      o.i().p(fullName() + "* " + to + "(Nan::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject())->getNwcpValue());");
+      o.i().p(fullName() + "* " + to + "(Nan::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject(Nan::GetCurrentContext()).ToLocalChecked())->getNwcpValue());");
     } else {
-      o.i().p(fullName() + "* " + to + "tmp(Nan::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject())->getNwcpValue());");
+      o.i().p(fullName() + "* " + to + "tmp(Nan::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject(Nan::GetCurrentContext()).ToLocalChecked())->getNwcpValue());");
       o.i().p(fullName() + "& " + to + " = *" + to + "tmp;");
     }
   }

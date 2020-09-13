@@ -35,9 +35,9 @@ public class VectorType extends CppType { //TODO
     CppType t = generics.get(0);
     if (t instanceof SoulSifterModelType) {  // TODO should be generic model
       t.outputWrap("(" + (isPointer() ? "*" : "") + "result)[i]", !isReference());
-      o.i().p("a->Set(Nan::New<v8::Number>(i), instance);").decIndent();
+      o.i().p("a->Set(Nan::GetCurrentContext(), Nan::New<v8::Number>(i), instance);").decIndent();
     } else {
-      o.i().p("a->Set(Nan::New<v8::Number>(i), ", false);
+      o.i().p("a->Set(Nan::GetCurrentContext(), Nan::New<v8::Number>(i), ", false);
       t.outputWrap((isPointer() ? "*" : "") + "result[i]");
       o.p(");").decIndent();
     }
@@ -51,8 +51,8 @@ public class VectorType extends CppType { //TODO
     String a = to + "Array";
     o.i().p("v8::Local<v8::Array> " + a + " = v8::Local<v8::Array>::Cast(" + from + ");");
     o.i().p(fullName() + " " + to + ";");
-    o.i().p("for (int i = 0; i < " + a + "->Length(); ++i) {").incIndent();
-    o.i().p("v8::Local<v8::Value> tmp = " + a + "->Get(i);");
+    o.i().p("for (uint32_t i = 0; i < " + a + "->Length(); ++i) {").incIndent();
+    o.i().p("v8::Local<v8::Value> tmp = " + a + "->Get(Nan::GetCurrentContext(), i).ToLocalChecked();");
     generics.get(0).outputUnwrap("tmp", "x");
     o.i().p(to + (isPointer() ? "->" : ".") + "push_back(x);");
     o.decIndent().i().p("}");

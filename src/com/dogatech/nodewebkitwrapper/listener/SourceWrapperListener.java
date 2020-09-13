@@ -102,7 +102,7 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     }
     o.p("");
     o.i().p("constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());");
-    o.i().p("exports->Set(Nan::New<v8::String>(\"" + cppClass.name + "\").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());");
+    o.i().p("exports->Set(Nan::GetCurrentContext(), Nan::New<v8::String>(\"" + cppClass.name + "\").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());");
     o.decIndent().i().p("}");
     o.p("");
     for (CppMethod m : cppClass.methods.values()) {

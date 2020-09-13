@@ -84,7 +84,7 @@ public class CppMethod {
     }
     returnType.outputResult();
     access.out();
-    o.p("");
+    if (!returnType.isType("void")) o.p("");
     returnType.outputReturn();
     o.decIndent().i().p("}");
     o.p("");

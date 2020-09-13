@@ -13,7 +13,7 @@ public class VoidType extends CppType {
 
   @Override
   public String v8Type() {
-    return "v8::Boolean";
+    return "v8::UNUSED";
   }
 
   @Override
@@ -22,6 +22,5 @@ public class VoidType extends CppType {
 
   @Override
   public void outputReturn() {
-    o.i().p("info.GetReturnValue().SetUndefined();");
   }
 }
