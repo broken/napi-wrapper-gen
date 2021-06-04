@@ -23,7 +23,8 @@ public class CppTypeFactory {
     new IntegerType(),
     new NumberType(),
     new StringType(),
-    new TimeTType()
+    new TimeTType(),
+    new FunctionType()
   };
 
   protected CppTypeFactory() { }
@@ -54,7 +55,12 @@ public class CppTypeFactory {
       }
     }
     if (t != null && ctx.generic() != null) {
-      for (nodewebkitwrapperParser.TypeContext tc : ctx.generic().typeList().type()) {
+      nodewebkitwrapperParser.TypeListContext tlc = ctx.generic().typeList();
+      // Expect callback functions always return void, so using param types as the "generics".
+      if (ctx.generic().fnType() != null) {
+        tlc = ctx.generic().fnType().typeList();
+      }
+      for (nodewebkitwrapperParser.TypeContext tc : tlc.type()) {
         CppType gt = createType(tc, cppClass, out);
         if (gt == null) return null;
         t.generics.add(gt);

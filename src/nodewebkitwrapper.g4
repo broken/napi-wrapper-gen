@@ -17,7 +17,7 @@ body
 
 namespace: NAMESPACE Identifier LCBRACE body RCBRACE;
 classDeclaration: CLASS Identifier SEMICOLON;
-enumDeclaration: ENUM Identifier LCBRACE (Identifier)* RCBRACE SEMICOLON;
+enumDeclaration: ENUM Identifier LCBRACE (Identifier COMMA?)* RCBRACE SEMICOLON;
 
 usingDeclaration: USING NAMESPACE Identifier SEMICOLON;
 
@@ -31,8 +31,8 @@ method: STATIC? VIRTUAL? type Identifier parameterList CONST? (block | SEMICOLON
 friend: FRIEND CLASS? type SEMICOLON;
 opMethod: type ( OPEQ | OPLT | OPGT ) parameterList CONST? SEMICOLON ;
 
-parameterList: LPAREN (parameter (parameter)*)? RPAREN;
-parameter: type Identifier (EQUALS Identifier)?;
+parameterList: LPAREN (parameter (COMMA parameter)*)? RPAREN;
+parameter: type Identifier (EQUALS (Identifier | Number | EmptyBlock))?;
 
 cppClass: CLASS Identifier LCBRACE classBlock RCBRACE SEMICOLON;
 
@@ -40,10 +40,11 @@ block: LCBRACE innerBlock RCBRACE;
 innerBlock: (Identifier | SEMICOLON | block | type | STATIC) innerBlock;
 
 type: CONST? Identifier generic? Modifier*;
-generic: LT typeList GT;
+fnType: Identifier LPAREN typeList RPAREN;
+generic: LT (typeList | fnType) GT;
 typeList: type (COMMA type)?;
 
-COMMA: ',' -> skip;
+COMMA: ',';
 LPAREN: '(';
 RPAREN: ')';
 LCBRACE: '{';
@@ -75,6 +76,9 @@ Identifier: NamespacePrefix? IdentifierName;
 fragment IdentifierName: Nondigit ( Nondigit | Digit )*;
 
 Modifier: STAR | AMPERSAND;
+
+Number: Digit+;
+EmptyBlock: LCBRACE RCBRACE;
 
 
 
