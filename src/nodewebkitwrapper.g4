@@ -78,10 +78,10 @@ Modifier: STAR | AMPERSAND;
 
 
 
-PrivateBlock: 'private:' ~['}']*
+PrivateBlock: 'private:' ~[}]*
     -> skip ;
 
-ProtectedBlock: 'protected:' ~['}']*
+ProtectedBlock: 'protected:' ~[}]*
     -> skip ;
 
 Public: 'public:'
