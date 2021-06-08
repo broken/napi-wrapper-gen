@@ -14,7 +14,7 @@ import com.dogatech.nodewebkitwrapper.prototype.CppMethod;
 public abstract class CppType {
   protected boolean isConst;
   public String name;
-  List<CppType> generics = new ArrayList<CppType>();
+  public List<CppType> generics = new ArrayList<CppType>();
   List<String> modifiers = new ArrayList<String>();
   protected CppClass cppClass;
   protected Outputter o;

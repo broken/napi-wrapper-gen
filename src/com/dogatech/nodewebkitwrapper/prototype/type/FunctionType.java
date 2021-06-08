@@ -28,6 +28,18 @@ public class FunctionType extends CppType {
 
   @Override
   public void outputUnwrap(String from, String to) {
+    if (generics.size() == 1 && generics.get(0).name.equals("float"))
+      outputUnwrapAsync(from, to);
+    else
+      outputUnwrapLocal(from, to);
+  }
+
+  private void outputUnwrapAsync(String from, String to) {
+    o.i().p("Nan::Callback* " + to + " = new Nan::Callback();");
+    o.i().p(to + "->Reset(" + from + ".As<v8::Function>());");
+  }
+
+  private void outputUnwrapLocal(String from, String to) {
     // First unwrap into a Nan::Callback
     String f = to + "Fn";
     o.i().p("Nan::Callback " + f + ";");

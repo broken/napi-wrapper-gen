@@ -7,6 +7,7 @@ import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
 import com.dogatech.nodewebkitwrapper.io.Outputter;
 import com.dogatech.nodewebkitwrapper.prototype.type.CppType;
 import com.dogatech.nodewebkitwrapper.prototype.type.CppTypeFactory;
+import com.dogatech.nodewebkitwrapper.prototype.type.FunctionType;
 
 
 public class CppMethod {
@@ -20,6 +21,7 @@ public class CppMethod {
   public boolean isSetter; // TODO remove
   private Outputter o;
   public boolean broken;
+  public boolean isAsync;
 
   public CppMethod(CppClass parentClass, nodewebkitwrapperParser.MethodContext ctx, Outputter out) {
     isStatic = ctx.STATIC() != null;
@@ -29,7 +31,9 @@ public class CppMethod {
     o = out;
     returnType = CppTypeFactory.instance().createType(ctx.type(), cppClass, o);
     for (nodewebkitwrapperParser.ParameterContext p : ctx.parameterList().parameter()) {
-      args.add(CppTypeFactory.instance().createType(p.type(), cppClass, o));
+      CppType t = CppTypeFactory.instance().createType(p.type(), cppClass, o);
+      args.add(t);
+      if (isProgressCallback(t)) isAsync = true;
     }
 
     for (MethodType mt : types) {
@@ -75,6 +79,7 @@ public class CppMethod {
 
   public void outputSource(String namespace, CppClass cppClass) {
     if (broken) return;
+    if (isAsync) outputSourceAsyncClass(namespace, cppClass);
     type.out();
     if (!isStatic)
       o.i().p(cppClass.name + "* obj = Nan::ObjectWrap::Unwrap<" + cppClass.name + ">(info.Holder());");
@@ -87,6 +92,75 @@ public class CppMethod {
     if (!returnType.isType("void")) o.p("");
     returnType.outputReturn();
     o.decIndent().i().p("}");
+    o.p("");
+  }
+
+  private String workerName() {
+    return name.substring(0, 1).toUpperCase() + name.substring(1) + "Worker";
+  }
+
+  private void outputSourceAsyncClass(String namespace, CppClass cppClass) {
+    o.p("class " + workerName() + " : public Nan::AsyncProgressWorkerBase<float> {");
+    o.p(" public:").incIndent();
+    o.i().p(workerName() + "(", false);      StringBuilder sb = new StringBuilder();
+    int num = 0;
+    for (int i = 0; i < args.size(); ++i) {
+      if (isProgressCallback(args.get(i))) {
+        sb.append("Nan::Callback*");
+        num = i;
+      } else {
+        sb.append(args.get(i).name);
+      }
+      sb.append(" a" + i);
+      if (i + 1 < args.size()) {
+        sb.append(", ");
+      }
+    }
+    o.p(sb.toString(), false);
+    o.p(")");
+    o.i().p("    : AsyncProgressWorkerBase(a" + num + "), progressCallback(a" + num + ") {").incIndent();
+    for (int i = 0; i < args.size(); ++i) {
+      if (!isProgressCallback(args.get(i))) {
+        String arg = type instanceof MtSetter ? "value" : "info[" + i + "]";
+        args.get(i).outputUnwrap(arg, "a" + i);
+        o.i().p("arg" + i + " = a" + i + ";");
+      }
+    }
+    o.decIndent().i().p("}");
+    o.p("");
+    o.i().p("~" + workerName() + "() {").incIndent();
+    o.i().p("// Sharing progressWorker currently; otherwise:");
+    o.i().p("// delete progressCallback;");
+    o.decIndent().i().p("}");
+    o.p("");
+    o.i().p("void Execute(const Nan::AsyncProgressWorkerBase<float>::ExecutionProgress& ep) {").incIndent();
+    for (int i = 0; i < args.size(); ++i) {
+      if (isProgressCallback(args.get(i))) {
+        o.i().p("auto a" + i, false);
+      }
+    }
+    o.p(" = [&ep](float p) {").incIndent();
+    o.i().p("ep.Send(&p, 1);");
+    o.decIndent().i().p("};");
+    o.i().p("dogatech::soulsifter::" + cppClass.name + "::" + name + "(" + access.paramList(args) + ");");
+    o.decIndent().i().p("}");
+    o.p("");
+    o.i().p("void HandleProgressCallback(const float *data, size_t count) {").incIndent();
+    o.i().p("Nan::HandleScope scope;");
+    o.i().p("v8::Local<v8::Value> v = Nan::New<v8::Number>(*data);");
+    o.i().p("v8::Local<v8::Value> argv[] = {v};");
+    o.i().p("progressCallback->Call(1, argv);");
+    o.decIndent().i().p("}");
+    o.p("");
+    o.decIndent().i().p(" private:").incIndent();
+    for (int i = 0; i < args.size(); ++i) {
+      if (!isProgressCallback(args.get(i))) {
+        CppType t = args.get(i);
+        o.i().p(t.name + " arg" + i + ";");
+      }
+    }
+    o.i().p("Nan::Callback* progressCallback;");
+    o.decIndent().i().p("};");
     o.p("");
   }
 
@@ -109,6 +183,14 @@ public class CppMethod {
         }
       }
     }
+  }
+
+  private boolean isProgressCallback(CppType type) {
+    return type instanceof FunctionType && type.generics.size() == 1 && type.generics.get(0).name.equals("float");
+  }
+
+  private boolean isCompleteCallback(CppType type) {
+    return type instanceof FunctionType && type.generics.size() == 1 && type.generics.get(0).name.endsWith("string");
   }
 
   private interface MethodPart {
@@ -158,6 +240,7 @@ public class CppMethod {
 
   private MethodAccess access;
   private MethodAccess[] accesses = {
+    new MaAsync(),
     new MaStatic(),
     new MaGeneric()
   };
@@ -208,6 +291,16 @@ public class CppMethod {
     @Override
     public void out() {
       o.i().p("obj->" + cppClass.name.toLowerCase() + "->" + name + "(" + paramList(args) + ");");
+    }
+  }
+  private class MaAsync extends MethodAccess {
+    @Override
+    public boolean canHandle(nodewebkitwrapperParser.MethodContext ctx) {
+      return isAsync;
+    }
+    @Override
+    public void out() {
+      o.i().p("Nan::AsyncQueueWorker(new " + workerName() + "(" + paramList(args) + "));");
     }
   }
 }
