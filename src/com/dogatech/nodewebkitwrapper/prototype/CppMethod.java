@@ -111,14 +111,11 @@ public class CppMethod {
       } else {
         sb.append(args.get(i).name);
       }
-      sb.append(" a" + i);
-      if (i + 1 < args.size()) {
-        sb.append(", ");
-      }
+      sb.append(" a" + i + ", ");
     }
-    o.p(sb.toString(), false);
-    o.p(")");
-    o.i().p("    : AsyncProgressWorkerBase(a" + num + "), progressCallback(a" + num + ") {").incIndent();
+    sb.append("Nan::Callback* callback)");
+    o.p(sb.toString());
+    o.i().p("    : AsyncProgressWorkerBase(callback), progressCallback(a" + num + ") {").incIndent();
     for (int i = 0; i < args.size(); ++i) {
       if (!isProgressCallback(args.get(i))) {
         String arg = type instanceof MtSetter ? "value" : "info[" + i + "]";
@@ -129,8 +126,7 @@ public class CppMethod {
     o.decIndent().i().p("}");
     o.p("");
     o.i().p("~" + workerName() + "() {").incIndent();
-    o.i().p("// Sharing progressWorker currently; otherwise:");
-    o.i().p("// delete progressCallback;");
+    o.i().p("delete progressCallback;");
     o.decIndent().i().p("}");
     o.p("");
     o.i().p("void Execute(const Nan::AsyncProgressWorkerBase<float>::ExecutionProgress& ep) {").incIndent();
@@ -300,7 +296,9 @@ public class CppMethod {
     }
     @Override
     public void out() {
-      o.i().p("Nan::AsyncQueueWorker(new " + workerName() + "(" + paramList(args) + "));");
+      o.i().p("Nan::Callback* cb = new Nan::Callback();");
+      o.i().p("cb->Reset(info[" + args.size() + "].As<v8::Function>());");
+      o.i().p("Nan::AsyncQueueWorker(new " + workerName() + "(" + paramList(args) + ", cb));");
     }
   }
 }
