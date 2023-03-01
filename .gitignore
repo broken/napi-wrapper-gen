@@ -18,3 +18,4 @@ test
 
 # Link to source files to process
 resources
+resources.*
