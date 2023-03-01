@@ -1,6 +1,6 @@
 <project default="go">
 
-  <property name="classpath" value="/usr/local/opt/antlr/antlr-4.7-complete.jar"/>
+  <property name="classpath" value="/usr/local/opt/antlr/antlr-4.12.0-complete.jar"/>
   <property name="build.dir" value="build" />
   <property name="classes.dir" value="${build.dir}/classes" />
   <property name="jar.dir" value="${build.dir}/jar" />
@@ -13,7 +13,7 @@
 
   <target name="antlr">
     <mkdir dir="${srcgen.dir}"/>
-    <exec executable="antlr4">
+    <exec executable="antlr">
       <arg value="-o"/>
       <arg value="${srcgen.dir}"/>
       <arg value="-package"/>
