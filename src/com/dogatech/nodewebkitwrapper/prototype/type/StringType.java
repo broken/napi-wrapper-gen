@@ -8,21 +8,16 @@ public class StringType extends CppType {
 
   @Override
   public boolean isType(String name) {
-    return name.startsWith("string");
-  }
-
-  @Override
-  public String v8Type() {
-    return "v8::String";
+    return name.startsWith("string") || name.startsWith("std::string");
   }
 
   @Override
   public void outputWrap(String var) {
-    o.p("Nan::New<" + v8Type() + ">(" + var + ").ToLocalChecked()", false);
+    o.p("Napi::String::New(info.Env(), " + var, false);
   }
 
   @Override
   public void outputUnwrap(String from, String to) {
-    o.i().p("string " + to + "(" + "*v8::String::Utf8Value(" + from + "->ToString()));");
+    o.i().p("std::string " + to + "(" + from + ".As<Napi::String>().Utf8Value());");
   }
 }

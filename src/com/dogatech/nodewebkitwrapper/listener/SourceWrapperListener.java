@@ -36,9 +36,7 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
   }
 
   @Override public void exitCppClass(@NotNull nodewebkitwrapperParser.CppClassContext ctx) {
-    o.i().p("#include <iostream>");
-    o.i().p("#include <node.h>");
-    o.i().p("#include <nan.h>");
+    o.i().p("#include <napi.h>");
     o.i().p("#include \"" + cppClass.name + "_wrap.h\"");
     SortedSet<String> headers = new TreeSet<String>();
     for (CppMethod m : cppClass.methods.values()) {
@@ -52,57 +50,55 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
       o.i().p("#include \"" + h + "\"");
     }
     o.p("");
-    o.i().p("Nan::Persistent<v8::Function> " + cppClass.name + "::constructor;");
-    o.p("");
-    o.p(cppClass.name + "::" + cppClass.name + "() : Nan::ObjectWrap(), " + cppClass.name.toLowerCase() + "(NULL), ownWrappedObject(true) {};");
-    o.p(cppClass.name + "::" + cppClass.name + "(" + cppNamespace + cppClass.name + "* o) : Nan::ObjectWrap(), " + cppClass.name.toLowerCase() + "(o), ownWrappedObject(true) {};");
+    // o.p(cppClass.name + "::" + cppClass.name + "() : Nan::ObjectWrap(), " + cppClass.name.toLowerCase() + "(nullptr), ownWrappedObject(true) {};");
+    // o.p(cppClass.name + "::" + cppClass.name + "(" + cppNamespace + cppClass.name + "* o) : Nan::ObjectWrap(), " + cppClass.name.toLowerCase() + "(o), ownWrappedObject(true) {};");
     o.p(cppClass.name + "::~" + cppClass.name + "() { if (ownWrappedObject) delete " + cppClass.name.toLowerCase() + "; };");
     o.p("");
-    o.i().p("void " + cppClass.name + "::setNwcpValue(" + cppNamespace + cppClass.name + "* v, bool own) {").incIndent();
+    o.i().p("void " + cppClass.name + "::setWrappedValue(" + cppNamespace + cppClass.name + "* v, bool own) {").incIndent();
     o.i().p("if (ownWrappedObject)").incIndent();
     o.i().p("delete " + cppClass.name.toLowerCase() + ";").decIndent();
     o.i().p(cppClass.name.toLowerCase() + " = v;");
     o.i().p("ownWrappedObject = own;");
     o.decIndent().i().p("}");
+    // o.p("");
+    // o.p("");
+    // o.i().p("v8::Local<v8::Object> " + cppClass.name + "::NewInstance() {").incIndent();
+    // o.i().p("v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);");
+    // o.i().p("return Nan::NewInstance(cons).ToLocalChecked();");
+    // o.decIndent().i().p("}");
     o.p("");
-    o.i().p("void " + cppClass.name + "::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {").incIndent();
-    if (cppClass.isSingleton() || !cppClass.hasCopyCtor) {
-      o.i().p("" + cppClass.name + "* obj = new " + cppClass.name + "(" + cppClass.createNewPointer() + ");");
-    } else {
-      o.i().p("" + cppClass.namespace + cppClass.name + "* wrappedObj = NULL;");
-      o.i().p("if (info.Length()) {").incIndent();
-      o.i().p("" + cppClass.namespace + cppClass.name + "* xtmp(Nan::ObjectWrap::Unwrap<" + cppClass.name + ">(info[0]->ToObject())->getNwcpValue());");
-      o.i().p("" + cppClass.namespace + cppClass.name + "& x = *xtmp;");
-      o.i().p("wrappedObj = new " + cppClass.namespace + cppClass.name + "(x);");
-      o.decIndent().i().p("} else {").incIndent();
-      o.i().p("wrappedObj = " + cppClass.createNewPointer() + ";");
-      o.decIndent().i().p("}");
-      o.p("");
-      o.i().p("" + cppClass.name + "* obj = new " + cppClass.name + "(wrappedObj);");
-    }
-    o.i().p("obj->Wrap(info.This());");
-    o.p("");
-    o.i().p("info.GetReturnValue().Set(info.This());");
-    o.decIndent().i().p("}");
-    o.p("");
-    o.i().p("v8::Local<v8::Object> " + cppClass.name + "::NewInstance() {").incIndent();
-    o.i().p("v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);");
-    o.i().p("return Nan::NewInstance(cons).ToLocalChecked();");
-    o.decIndent().i().p("}");
-    o.p("");
-    o.i().p("void " + cppClass.name + "::Init(v8::Local<v8::Object> exports) {").incIndent();
-    o.i().p("// Prepare constructor template");
-    o.i().p("v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(New);");
-    o.i().p("tpl->SetClassName(Nan::New(\"" + cppClass.name + "\").ToLocalChecked());");
-    o.i().p("tpl->InstanceTemplate()->SetInternalFieldCount(1);");
-    o.p("");
-    o.i().p("// Prototype");
+    o.i().p("Napi::Object " + cppClass.name + "::Init(Napi::Env env, Napi::Object exports) {").incIndent();
+    o.i().p("Napi::Function func = DefineClass(env, \"" + cppClass.name + "\", {").incIndent();
     for (CppMethod m : cppClass.methods.values()) {
       m.outputDeclaration();
     }
+    o.decIndent().i().p("});");
     o.p("");
-    o.i().p("constructor.Reset(Nan::GetFunction(tpl).ToLocalChecked());");
-    o.i().p("exports->Set(Nan::GetCurrentContext(), Nan::New<v8::String>(\"" + cppClass.name + "\").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());");
+    o.i().p("Napi::FunctionReference *constructor = new Napi::FunctionReference();");
+    o.i().p("*constructor = Napi::Persistent(func);");
+    o.i().p("env.SetInstanceData(constructor);");
+    o.p("");
+    o.i().p("exports.Set(\"" + cppClass.name + "\", func);");
+    o.i().p("return exports;");
+    o.decIndent().i().p("}");
+    o.p("");
+    o.i().p("Napi::Object " + cppClass.name + "::NewInstance(Napi::Env env) {").incIndent();
+    o.i().p("Napi::EscapableHandleScope scope(env);");
+    o.i().p("Napi::Object obj = env.GetInstanceData<Napi::FunctionReference>()->New({});");
+    o.i().p("return scope.Escape(napi_value(obj)).ToObject();");
+    o.decIndent().i().p("}");
+    o.p("");
+    o.i().p(cppClass.name + "::" + cppClass.name + "(const Napi::CallbackInfo& info) : Napi::ObjectWrap<" + cppClass.name + ">(info), " + cppClass.name.toLowerCase() + "(nullptr), ownWrappedObject(true) {").incIndent();
+    if (!cppClass.hasCopyCtor) {
+      o.i().p(cppClass.name.toLowerCase() + " = new " + cppClass.namespace + cppClass.name + "();");
+    } else {
+      o.i().p("if (info.Length()) {").incIndent();
+      o.i().p("" + cppClass.namespace + cppClass.name + "* x = Napi::ObjectWrap::Unwrap<" + cppClass.name + ">(info[0].As<Napi::Object>())->getWrappedObject();");
+      o.i().p(cppClass.name.toLowerCase() + " = new " + cppClass.namespace + cppClass.name + "(*x);");
+      o.decIndent().i().p("} else {").incIndent();
+      o.i().p(cppClass.name.toLowerCase() + " = " + cppClass.createNewPointer() + ";");
+      o.decIndent().i().p("}");
+    }
     o.decIndent().i().p("}");
     o.p("");
     for (CppMethod m : cppClass.methods.values()) {

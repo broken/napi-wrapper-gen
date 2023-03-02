@@ -12,11 +12,6 @@ public class FunctionType extends CppType {
   }
 
   @Override
-  public String v8Type() {
-    return "v8::Function";
-  }
-
-  @Override
   public void outputResult() {
     throw new RuntimeException("Not implemented.");
   }

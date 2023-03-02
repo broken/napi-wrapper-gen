@@ -12,11 +12,6 @@ public class VoidType extends CppType {
   }
 
   @Override
-  public String v8Type() {
-    return "v8::UNUSED";
-  }
-
-  @Override
   public void outputResult() {
   }
 

@@ -12,12 +12,12 @@ public class NumberType extends CppType {
   }
 
   @Override
-  public String v8Type() {
-    return "v8::Number";
+  public void outputWrap(String var) {
+    o.p("Napi::Number::New(info.Env(), " + var + ")", false);
   }
 
   @Override
   public void outputUnwrap(String from, String to) {
-    o.i().p("double " + to + "(" + from + "->NumberValue());");
+    o.i().p("double " + to + "(" + from + ".As<Napi::Number>().DoubleValue());");
   }
 }

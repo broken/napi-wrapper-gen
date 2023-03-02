@@ -12,12 +12,12 @@ public class BooleanType extends CppType {
   }
 
   @Override
-  public String v8Type() {
-    return "v8::Boolean";
+  public void outputWrap(String var) {
+    o.p("Napi::Boolean::New(info.Env(), " + var + ")", false);
   }
 
   @Override
   public void outputUnwrap(String from, String to) {
-    o.i().p("bool " + to + "(" + from + "->BooleanValue());");
+    o.i().p("bool " + to + "(" + from + ".As<Napi::Boolean>().Value());");
   }
 }

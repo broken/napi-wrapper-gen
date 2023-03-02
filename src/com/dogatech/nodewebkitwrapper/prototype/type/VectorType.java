@@ -14,11 +14,6 @@ public class VectorType extends CppType { //TODO
   }
 
   @Override
-  public String v8Type() {
-    return "v8::Array";
-  }
-
-  @Override
   public boolean isType(nodewebkitwrapperParser.TypeContext ctx) {
     return isType(ctx.Identifier().toString()) && ctx.Modifier().size() <= 1;
   }
@@ -30,29 +25,29 @@ public class VectorType extends CppType { //TODO
 
   @Override
   public void outputReturn() {
-    o.i().p("v8::Local<v8::Array> a = Nan::New<v8::Array>((int) result" + (isPointer() ? "->" : ".") + "size());");
+    o.i().p("Napi::Array a = Napi::Array::New(info.Env(), static_cast<int>(result" + (isPointer() ? "->" : ".") + "size()));");
     o.i().p("for (int i = 0; i < (int) result" + (isPointer() ? "->" : ".") + "size(); i++) {").incIndent();
     CppType t = generics.get(0);
     if (t instanceof SoulSifterModelType) {  // TODO should be generic model
       t.outputWrap("(" + (isPointer() ? "*" : "") + "result)[i]", !isReference());
-      o.i().p("a->Set(Nan::GetCurrentContext(), Nan::New<v8::Number>(i), instance);").decIndent();
+      o.i().p("a.Set(i, instance);").decIndent();
     } else {
-      o.i().p("a->Set(Nan::GetCurrentContext(), Nan::New<v8::Number>(i), ", false);
+      o.i().p("a.Set(i, ", false);
       t.outputWrap((isPointer() ? "*" : "") + "result[i]");
       o.p(");").decIndent();
     }
     o.i().p("}");
     if (isPointer()) o.i().p("delete result;");
-    o.i().p("info.GetReturnValue().Set(a);");
+    o.i().p("return a;");
   }
 
   @Override
   public void outputUnwrap(String from, String to) {
     String a = to + "Array";
-    o.i().p("v8::Local<v8::Array> " + a + " = v8::Local<v8::Array>::Cast(" + from + ");");
+    o.i().p("Napi::Array " + a + " = v8::Local<v8::Array>::Cast(" + from + ");");
     o.i().p(fullName() + " " + to + ";");
     o.i().p("for (uint32_t i = 0; i < " + a + "->Length(); ++i) {").incIndent();
-    o.i().p("v8::Local<v8::Value> tmp = " + a + "->Get(Nan::GetCurrentContext(), i).ToLocalChecked();");
+    o.i().p("Napi::Value tmp = " + a + ".Get(i);");
     generics.get(0).outputUnwrap("tmp", "x");
     o.i().p(to + (isPointer() ? "->" : ".") + "push_back(x);");
     o.decIndent().i().p("}");

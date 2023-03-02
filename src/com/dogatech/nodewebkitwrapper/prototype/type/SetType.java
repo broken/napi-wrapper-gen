@@ -10,12 +10,9 @@ public class SetType extends VectorType {
 
   @Override
   public boolean isType(String name) {
-    return name.startsWith("set");
-  }
-
-  @Override
-  public String v8Type() {
-    return "v8::Array";
+    // TODO fix - currently nothing returns a set
+    return false;
+    // return name.startsWith("set");
   }
 
   @Override

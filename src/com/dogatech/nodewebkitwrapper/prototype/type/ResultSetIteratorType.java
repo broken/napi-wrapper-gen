@@ -14,11 +14,6 @@ public class ResultSetIteratorType extends CppType {
   }
 
   @Override
-  public String v8Type() {
-    return "v8::Array";
-  }
-
-  @Override
   public void outputResult() {
     o.i().p("dogatech::ResultSetIterator<dogatech::soulsifter::" + cppClass.name + ">* result =", false);
   }
@@ -27,16 +22,15 @@ public class ResultSetIteratorType extends CppType {
   public void outputReturn() {
     String generic = this.generics.get(0).name;  // we only expect one
     o.i().p("vector<dogatech::soulsifter::" + cppClass.name + "*>* v = result->toVector();");
-    o.i().p("v8::Local<v8::Array> a = Nan::New<v8::Array>((int) v->size());");
+    o.i().p("Napi::Array a = Napi::Array::New(info.Env(), static_cast<int>(v->size()));");
     o.i().p("for (int i = 0; i < (int) v->size(); i++) {").incIndent();
-    o.i().p("v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);");
-    o.i().p("v8::Local<v8::Object> instance = Nan::NewInstance(cons).ToLocalChecked();");
-    o.i().p(generic + "* o = Nan::ObjectWrap::Unwrap<" + generic + ">(instance);");
-    o.i().p("o->" + cppClass.name.toLowerCase() + " = (*v)[i];");
-    o.i().p("a->Set(Nan::GetCurrentContext(), Nan::New<v8::Number>(i), instance);").decIndent();
+    o.i().p("Napi::Object instance = " + generic + "::NewInstance(info.Env());");
+    o.i().p(generic + "* r = Napi::ObjectWrap<" + generic + ">::Unwrap(instance);");
+    o.i().p("r->setWrappedValue((*v)[i]);");
+    o.i().p("a.Set(i, instance);").decIndent();
     o.i().p("}");
     o.i().p("delete v;");
-    o.i().p("info.GetReturnValue().Set(a);");
+    o.i().p("return a;");
   }
 
   @Override

@@ -25,11 +25,6 @@ public class SoulSifterModelType extends CppType {
   }
 
   @Override
-  public String v8Type() {
-    return "v8::Object";
-  }
-
-  @Override
   public void outputResult() {
     o.i().p((isConst ? "const " : "") + fullName() + "* result =", false);
   }
@@ -37,11 +32,10 @@ public class SoulSifterModelType extends CppType {
   @Override
   public void outputReturn() {
     o.i().p("if (result == NULL) {").incIndent();
-    o.i().p("info.GetReturnValue().SetNull();");
+    o.i().p("return env.Null();");
     o.decIndent().i().p("} else {").incIndent();
     outputWrap("result");
-    o.p("");
-    o.i().p("info.GetReturnValue().Set(instance);");
+    o.i().p("return instance;");
     o.decIndent().i().p("}");
   }
 
@@ -52,17 +46,17 @@ public class SoulSifterModelType extends CppType {
 
   @Override
   public void outputWrap(String var, boolean own) {
-    o.i().p("v8::Local<v8::Object> instance = " + name + "::NewInstance();");
-    o.i().p(name + "* r = Nan::ObjectWrap::Unwrap<" + name + ">(instance);");
-    o.i().p("r->setNwcpValue(" + var + ", " + String.valueOf(own) + ");");
+    o.i().p("Napi::Object instance = " + name + "::NewInstance(info.Env());");
+    o.i().p(name + "* r = Napi::ObjectWrap<" + name + ">::Unwrap(instance);");
+    o.i().p("r->setWrappedValue(" + var + ", " + String.valueOf(own) + ");");
   }
 
   @Override
   public void outputUnwrap(String from, String to) {
     if (isPointer()) {
-      o.i().p(fullName() + "* " + to + "(Nan::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject(Nan::GetCurrentContext()).ToLocalChecked())->getNwcpValue());");
+      o.i().p(fullName() + "* " + to + "(Napi::ObjectWrap<" + name + ">::Unwrap(" + from + ".As<Napi::Object>())->getWrappedValue());");
     } else {
-      o.i().p(fullName() + "* " + to + "tmp(Nan::ObjectWrap::Unwrap<" + name + ">(" + from + "->ToObject(Nan::GetCurrentContext()).ToLocalChecked())->getNwcpValue());");
+      o.i().p(fullName() + "* " + to + "tmp(Napi::ObjectWrap<" + name + ">::Unwrap(" + from + ".As<Napi::Object>())->getWrappedValue());");
       o.i().p(fullName() + "& " + to + " = *" + to + "tmp;");
     }
   }
