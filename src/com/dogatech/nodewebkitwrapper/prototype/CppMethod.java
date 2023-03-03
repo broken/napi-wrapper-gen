@@ -254,7 +254,7 @@ public class CppMethod {
       o.i().p("v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);");
       o.i().p("v8::Local<v8::Object> instance = Nan::NewInstance(cons).ToLocalChecked();");
       o.p("");
-      o.i().p(cppClass.name + "* obj = Napi::ObjectWrap::Unwrap<" + cppClass.name + ">(instance);");
+      o.i().p(cppClass.name + "* obj = Napi::ObjectWrap<" + cppClass.name + ">::Unwrap(instance);");
       o.i().p("obj->" + cppClass.name.toLowerCase() + " = result;");
     }
   }

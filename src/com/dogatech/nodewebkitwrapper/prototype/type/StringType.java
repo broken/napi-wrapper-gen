@@ -13,7 +13,7 @@ public class StringType extends CppType {
 
   @Override
   public void outputWrap(String var) {
-    o.p("Napi::String::New(info.Env(), " + var, false);
+    o.p("Napi::String::New(info.Env(), " + var + ")", false);
   }
 
   @Override

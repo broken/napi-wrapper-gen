@@ -93,7 +93,7 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
       o.i().p(cppClass.name.toLowerCase() + " = new " + cppClass.namespace + cppClass.name + "();");
     } else {
       o.i().p("if (info.Length()) {").incIndent();
-      o.i().p("" + cppClass.namespace + cppClass.name + "* x = Napi::ObjectWrap::Unwrap<" + cppClass.name + ">(info[0].As<Napi::Object>())->getWrappedObject();");
+      o.i().p("" + cppClass.namespace + cppClass.name + "* x = Napi::ObjectWrap<" + cppClass.name + ">::Unwrap(info[0].As<Napi::Object>())->getWrappedValue();");
       o.i().p(cppClass.name.toLowerCase() + " = new " + cppClass.namespace + cppClass.name + "(*x);");
       o.decIndent().i().p("} else {").incIndent();
       o.i().p(cppClass.name.toLowerCase() + " = " + cppClass.createNewPointer() + ";");

@@ -44,9 +44,9 @@ public class VectorType extends CppType { //TODO
   @Override
   public void outputUnwrap(String from, String to) {
     String a = to + "Array";
-    o.i().p("Napi::Array " + a + " = v8::Local<v8::Array>::Cast(" + from + ");");
+    o.i().p("Napi::Array " + a + " = " + from + ".As<Napi::Array>();");
     o.i().p(fullName() + " " + to + ";");
-    o.i().p("for (uint32_t i = 0; i < " + a + "->Length(); ++i) {").incIndent();
+    o.i().p("for (uint32_t i = 0; i < " + a + ".Length(); ++i) {").incIndent();
     o.i().p("Napi::Value tmp = " + a + ".Get(i);");
     generics.get(0).outputUnwrap("tmp", "x");
     o.i().p(to + (isPointer() ? "->" : ".") + "push_back(x);");

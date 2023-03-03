@@ -26,7 +26,7 @@ public class ResultSetIteratorType extends CppType {
     o.i().p("for (int i = 0; i < (int) v->size(); i++) {").incIndent();
     o.i().p("Napi::Object instance = " + generic + "::NewInstance(info.Env());");
     o.i().p(generic + "* r = Napi::ObjectWrap<" + generic + ">::Unwrap(instance);");
-    o.i().p("r->setWrappedValue((*v)[i]);");
+    o.i().p("r->setWrappedValue((*v)[i], true);");
     o.i().p("a.Set(i, instance);").decIndent();
     o.i().p("}");
     o.i().p("delete v;");

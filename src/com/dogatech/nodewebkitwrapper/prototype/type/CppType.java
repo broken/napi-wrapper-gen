@@ -36,7 +36,7 @@ public abstract class CppType {
   public void outputReturn() {
     o.i().p("return ", false);
     outputWrap("result");
-    o.p(");");
+    o.p(";");
   }
 
   /** Returns a string for how this object is wrapped. */

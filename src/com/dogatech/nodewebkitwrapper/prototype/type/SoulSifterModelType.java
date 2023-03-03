@@ -32,7 +32,7 @@ public class SoulSifterModelType extends CppType {
   @Override
   public void outputReturn() {
     o.i().p("if (result == NULL) {").incIndent();
-    o.i().p("return env.Null();");
+    o.i().p("return info.Env().Null();");
     o.decIndent().i().p("} else {").incIndent();
     outputWrap("result");
     o.i().p("return instance;");
