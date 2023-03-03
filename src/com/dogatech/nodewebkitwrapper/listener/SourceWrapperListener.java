@@ -50,6 +50,8 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
       o.i().p("#include \"" + h + "\"");
     }
     o.p("");
+    o.i().p("Napi::FunctionReference* " + cppClass.name + "::constructor = nullptr;");
+    o.p("");
     // o.p(cppClass.name + "::" + cppClass.name + "() : Nan::ObjectWrap(), " + cppClass.name.toLowerCase() + "(nullptr), ownWrappedObject(true) {};");
     // o.p(cppClass.name + "::" + cppClass.name + "(" + cppNamespace + cppClass.name + "* o) : Nan::ObjectWrap(), " + cppClass.name.toLowerCase() + "(o), ownWrappedObject(true) {};");
     o.p(cppClass.name + "::~" + cppClass.name + "() { if (ownWrappedObject) delete " + cppClass.name.toLowerCase() + "; };");
@@ -74,9 +76,8 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     }
     o.decIndent().i().p("});");
     o.p("");
-    o.i().p("Napi::FunctionReference *constructor = new Napi::FunctionReference();");
+    o.i().p("constructor = new Napi::FunctionReference();");
     o.i().p("*constructor = Napi::Persistent(func);");
-    o.i().p("env.SetInstanceData(constructor);");
     o.p("");
     o.i().p("exports.Set(\"" + cppClass.name + "\", func);");
     o.i().p("return exports;");
@@ -84,7 +85,7 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     o.p("");
     o.i().p("Napi::Object " + cppClass.name + "::NewInstance(Napi::Env env) {").incIndent();
     o.i().p("Napi::EscapableHandleScope scope(env);");
-    o.i().p("Napi::Object obj = env.GetInstanceData<Napi::FunctionReference>()->New({});");
+    o.i().p("Napi::Object obj = " + cppClass.name + "::constructor->New({});");
     o.i().p("return scope.Escape(napi_value(obj)).ToObject();");
     o.decIndent().i().p("}");
     o.p("");

@@ -51,6 +51,7 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
       m.outputHeader();
     }
     o.p("");
+    o.i().p("static Napi::FunctionReference* constructor;");
     o.i().p(cppNamespace + cppClass.name + "* " + cppClass.name.toLowerCase() + ";");
     o.i().p("bool ownWrappedObject;");
     o.decIndent();
