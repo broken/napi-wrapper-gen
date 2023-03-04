@@ -17,7 +17,7 @@ Requirements
 * ant
 * antlr
 
-* create a shortlink to your files to convert. Example: ln -s ../soulsifter/src/soulsifter resources
+* create a shortlink to your files to convert. Example: `ln -s ../sse/be/src resources`
 
 
 Dislaimer Section
