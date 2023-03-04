@@ -41,7 +41,6 @@ ant all
 Sample output
 -------------
 You can view the output of this program by checking out the __wrap.[h,cc]_ files in my [SoulSifterE](https://github.com/broken/soulsifter-e/tree/master/be/src) project.
-https://github.com/broken/soulsifter/tree/master/src/soulsifter
 
 
 Test grammar
