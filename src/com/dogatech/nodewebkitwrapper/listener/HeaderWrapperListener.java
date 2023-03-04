@@ -12,21 +12,17 @@ import org.antlr.v4.runtime.misc.NotNull;
 import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperBaseListener;
 import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
 import com.dogatech.nodewebkitwrapper.io.Outputter;
+import com.dogatech.nodewebkitwrapper.listener.BaseWrapperListener;
 import com.dogatech.nodewebkitwrapper.prototype.CppClass;
 import com.dogatech.nodewebkitwrapper.prototype.CppNamespace;
 import com.dogatech.nodewebkitwrapper.prototype.CppMethod;
 import com.dogatech.nodewebkitwrapper.prototype.type.CppType;
 
 
-public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
-  nodewebkitwrapperParser parser;
-  Outputter o;
-  CppNamespace cppNamespace = new CppNamespace();
-  CppClass cppClass;
+public class HeaderWrapperListener extends BaseWrapperListener {
 
   public HeaderWrapperListener(nodewebkitwrapperParser p, Outputter out) {
-    parser = p;
-    o = out;
+    super(p, out);
   }
 
   @Override public void exitCppClass(@NotNull nodewebkitwrapperParser.CppClassContext ctx) {
@@ -58,22 +54,6 @@ public class HeaderWrapperListener extends nodewebkitwrapperBaseListener {
     o.i().p("};");
     o.p("");
     o.i().p("#endif");
-  }
-
-  @Override public void enterNamespace(@NotNull nodewebkitwrapperParser.NamespaceContext ctx) {
-    cppNamespace.push(ctx.Identifier().toString());
-  }
-
-  @Override public void exitNamespace(@NotNull nodewebkitwrapperParser.NamespaceContext ctx) {
-    cppNamespace.pop();
-  }
-
-  @Override public void enterCppClass(@NotNull nodewebkitwrapperParser.CppClassContext ctx) {
-    cppClass = new CppClass(cppNamespace, ctx);
-  }
-
-  @Override public void enterMethod(@NotNull nodewebkitwrapperParser.MethodContext ctx) {
-    cppClass.addMethod(new CppMethod(cppClass, ctx, o));
   }
 
 }

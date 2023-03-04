@@ -10,7 +10,8 @@ build/
 *_wrap.h
 *.png
 
-# Sublime
+# IDE
+settings.json
 *.sublime-project
 *.sublime-workspace
 
