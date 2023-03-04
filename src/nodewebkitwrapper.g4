@@ -27,9 +27,10 @@ publicBlock: constructor | destructor | method | friend | opMethod ;
 
 constructor: EXPLICIT? Identifier parameterList SEMICOLON;
 destructor: VIRTUAL? '~' Identifier LPAREN RPAREN SEMICOLON;
-method: STATIC? VIRTUAL? type Identifier parameterList CONST? (block | SEMICOLON);
+method: template? STATIC? VIRTUAL? type Identifier parameterList CONST? (block | SEMICOLON);
 friend: FRIEND CLASS? type SEMICOLON;
 opMethod: type ( OPEQ | OPLT | OPGT ) parameterList CONST? SEMICOLON ;
+template: TEMPLATE LT TYPENAME Identifier GT;
 
 parameterList: LPAREN (parameter (COMMA parameter)*)? RPAREN;
 parameter: type Identifier (EQUALS (Identifier | Number | EmptyBlock))?;
@@ -62,6 +63,8 @@ CONST: 'const' ;
 ENUM: 'enum';
 EXPLICIT: 'explicit' ;
 STATIC: 'static' ;
+TEMPLATE: 'template';
+TYPENAME: 'typename';
 VIRTUAL: 'virtual' ;
 OPEQ: 'operator=' ;
 OPLT: 'operator<' ;

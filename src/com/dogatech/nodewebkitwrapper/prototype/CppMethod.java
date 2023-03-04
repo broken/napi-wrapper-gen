@@ -206,7 +206,8 @@ public class CppMethod {
   private class MtGetter extends MethodType {
     @Override
     public boolean canHandle(nodewebkitwrapperParser.MethodContext ctx) {
-      return name.startsWith("get")
+      return name.length() > 3
+          && name.startsWith("get")
           && name.substring(3,4).equals(name.substring(3,4).toUpperCase())
           && args.size() == 0;
     }
@@ -214,7 +215,8 @@ public class CppMethod {
   private class MtSetter extends MethodType {
     @Override
     public boolean canHandle(nodewebkitwrapperParser.MethodContext ctx) {
-      return name.startsWith("set")
+      return name.length() > 3
+          && name.startsWith("set")
           && name.substring(3,4).equals(name.substring(3,4).toUpperCase())
           && args.size() == 1;
     }
