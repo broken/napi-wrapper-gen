@@ -1,7 +1,11 @@
-node-webkit-cpp-wrapper
-=======================
+Napi Wrapper Generator
+======================
 
-I went looking for a tool like this, but to my surprise, it hasn't been built yet. O_o
+This reads C++ header files, and generates the necessary C++ header and source files using node-addon-api to use them as native Node components.
+
+This is regloss of my [Node-Webkit-Cpp-Wrapper](https://github.com/broken/node-webkit-cpp-wrapper) which does the same thing but for Nan.
+
+I wish I didn't have to write this myself, but I cannot find anything else like it. T_T
 
 
 Requirements
@@ -18,11 +22,11 @@ Requirements
 
 Dislaimer Section
 -----------------
-1. This is currently a work in progress, but once it meets the needs for my current project, I'll most likely cease work until I finish that project.
+1. This is currently a work in progress to meet the needs for my current project. As such, it is unfinished and has no support.
 
 2. I wrote just enough to wrap the classes I needed. For one, that means it's written mostly like a script, and less like a well structured program.  It also means this is by no means an exhaustive translation tool. However, it's simple enough that you should be able to plug the holes to fit your needs.
 
-3. I do not know antlr. I read just enough to build this grammar to work for me. I could have probably used antlr3, as I believe there is a C++ grammar for it, but after testing the C grammar on my header files, I realized that any complete grammar would be overkill, and writing my own would be much easier when building the translation listeners.
+3. I do not know antlr. I read just enough to build this grammar to work for me. After testing a true C grammar on my header files, I realized that any complete grammar would be overkill, and writing my own would be much easier when building the translation listeners.
 
 4. Please submit patches if you used/improved this. Or, let me know if you have run across a better tool, and I'll point to it from this doc.
 
