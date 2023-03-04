@@ -22,7 +22,7 @@ public class CppClass {
   }
 
   public String createNewPointer() {
-    return isSingleton() ? "&(" + namespace + name + "::getInstance())"
+    return isSingleton() ? "&" + namespace + name + "::getInstance()"
                        : "new " + namespace + name + "()";
   }
 

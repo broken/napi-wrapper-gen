@@ -3,6 +3,7 @@
 
 # Build files
 build/
+.antlr/
 
 # Output files
 *_wrap.cc

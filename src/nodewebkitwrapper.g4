@@ -37,7 +37,7 @@ parameter: type Identifier (EQUALS (Identifier | Number | EmptyBlock))?;
 cppClass: CLASS Identifier LCBRACE classBlock RCBRACE SEMICOLON;
 
 block: LCBRACE innerBlock RCBRACE;
-innerBlock: (Identifier | SEMICOLON | block | type | STATIC) innerBlock;
+innerBlock: (Identifier | SEMICOLON | block | type | STATIC | EQUALS | Number)*;
 
 type: CONST? Identifier generic? Modifier*;
 fnType: Identifier LPAREN typeList RPAREN;

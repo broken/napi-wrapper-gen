@@ -52,8 +52,6 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     o.p("");
     o.i().p("Napi::FunctionReference* " + cppClass.name + "::constructor = nullptr;");
     o.p("");
-    // o.p(cppClass.name + "::" + cppClass.name + "() : Nan::ObjectWrap(), " + cppClass.name.toLowerCase() + "(nullptr), ownWrappedObject(true) {};");
-    // o.p(cppClass.name + "::" + cppClass.name + "(" + cppNamespace + cppClass.name + "* o) : Nan::ObjectWrap(), " + cppClass.name.toLowerCase() + "(o), ownWrappedObject(true) {};");
     o.p(cppClass.name + "::~" + cppClass.name + "() { if (ownWrappedObject) delete " + cppClass.name.toLowerCase() + "; };");
     o.p("");
     o.i().p("void " + cppClass.name + "::setWrappedValue(" + cppNamespace + cppClass.name + "* v, bool own) {").incIndent();
@@ -89,9 +87,9 @@ public class SourceWrapperListener extends nodewebkitwrapperBaseListener {
     o.i().p("return scope.Escape(napi_value(obj)).ToObject();");
     o.decIndent().i().p("}");
     o.p("");
-    o.i().p(cppClass.name + "::" + cppClass.name + "(const Napi::CallbackInfo& info) : Napi::ObjectWrap<" + cppClass.name + ">(info), " + cppClass.name.toLowerCase() + "(nullptr), ownWrappedObject(true) {").incIndent();
+    o.i().p(cppClass.name + "::" + cppClass.name + "(const Napi::CallbackInfo& info) : Napi::ObjectWrap<" + cppClass.name + ">(info), " + cppClass.name.toLowerCase() + "(nullptr), ownWrappedObject(" + !cppClass.isSingleton() + ") {").incIndent();
     if (!cppClass.hasCopyCtor) {
-      o.i().p(cppClass.name.toLowerCase() + " = new " + cppClass.namespace + cppClass.name + "();");
+      o.i().p(cppClass.name.toLowerCase() + " = " + cppClass.createNewPointer() + ";");
     } else {
       o.i().p("if (info.Length()) {").incIndent();
       o.i().p("" + cppClass.namespace + cppClass.name + "* x = Napi::ObjectWrap<" + cppClass.name + ">::Unwrap(info[0].As<Napi::Object>())->getWrappedValue();");
