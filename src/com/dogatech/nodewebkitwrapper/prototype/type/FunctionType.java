@@ -30,8 +30,7 @@ public class FunctionType extends CppType {
   }
 
   private void outputUnwrapAsync(String from, String to) {
-    o.i().p("Nan::Callback* " + to + " = new Nan::Callback();");
-    o.i().p(to + "->Reset(" + from + ".As<v8::Function>());");
+    o.i().p("Napi::Function " + to + " = " + from + ".As<Napi::Function>();");
   }
 
   private void outputUnwrapLocal(String from, String to) {

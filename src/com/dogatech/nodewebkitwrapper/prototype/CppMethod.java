@@ -98,22 +98,23 @@ public class CppMethod {
   }
 
   private void outputSourceAsyncClass(String namespace, CppClass cppClass) {
-    o.p("class " + workerName() + " : public Nan::AsyncProgressWorkerBase<float> {");
+    o.p("class " + workerName() + " : public Napi::AsyncProgressWorker<float> {");
     o.p(" public:").incIndent();
     o.i().p(workerName() + "(", false);      StringBuilder sb = new StringBuilder();
     int num = 0;
     for (int i = 0; i < args.size(); ++i) {
+      if (i > 0) sb.append(", ");
       if (isProgressCallback(args.get(i))) {
-        sb.append("Nan::Callback*");
+        sb.append("Napi::Function&");
         num = i;
       } else {
         sb.append(args.get(i).name);
       }
-      sb.append(" a" + i + ", ");
+      sb.append(" a" + i);
     }
-    sb.append("Nan::Callback* callback)");
+    sb.append(")");
     o.p(sb.toString());
-    o.i().p("    : AsyncProgressWorkerBase(callback), progressCallback(a" + num + ") {").incIndent();
+    o.i().p("    : Napi::AsyncProgressWorker<float>(a0) {").incIndent();
     for (int i = 0; i < args.size(); ++i) {
       if (!isProgressCallback(args.get(i))) {
         String arg = type instanceof MtSetter ? "value" : "info[" + i + "]";
@@ -123,11 +124,9 @@ public class CppMethod {
     }
     o.decIndent().i().p("}");
     o.p("");
-    o.i().p("~" + workerName() + "() {").incIndent();
-    o.i().p("delete progressCallback;");
-    o.decIndent().i().p("}");
+    o.i().p("~" + workerName() + "() { }");
     o.p("");
-    o.i().p("void Execute(const Nan::AsyncProgressWorkerBase<float>::ExecutionProgress& ep) {").incIndent();
+    o.i().p("void Execute(const Napi::AsyncProgressWorker<float>::ExecutionProgress& ep) {").incIndent();
     for (int i = 0; i < args.size(); ++i) {
       if (isProgressCallback(args.get(i))) {
         o.i().p("auto a" + i, false);
@@ -139,11 +138,9 @@ public class CppMethod {
     o.i().p("dogatech::soulsifter::" + cppClass.name + "::" + name + "(" + access.paramList(args) + ");");
     o.decIndent().i().p("}");
     o.p("");
-    o.i().p("void HandleProgressCallback(const float *data, size_t count) {").incIndent();
-    o.i().p("Nan::HandleScope scope;");
-    o.i().p("v8::Local<v8::Value> v = Nan::New<v8::Number>(*data);");
-    o.i().p("v8::Local<v8::Value> argv[] = {v};");
-    o.i().p("progressCallback->Call(1, argv);");
+    o.i().p("void OnProgress(const float *data, size_t count) {").incIndent();
+    o.i().p("Napi::HandleScope scope(Env());");
+    o.i().p("Callback().Call({Env().Null(), Env().Null(), Napi::Number::New(Env(), *data)});");
     o.decIndent().i().p("}");
     o.p("");
     o.decIndent().i().p(" private:").incIndent();
@@ -153,7 +150,6 @@ public class CppMethod {
         o.i().p(t.name + " arg" + i + ";");
       }
     }
-    o.i().p("Nan::Callback* progressCallback;");
     o.decIndent().i().p("};");
     o.p("");
   }
@@ -288,9 +284,9 @@ public class CppMethod {
     }
     @Override
     public void out() {
-      o.i().p("Nan::Callback* cb = new Nan::Callback();");
-      o.i().p("cb->Reset(info[" + args.size() + "].As<v8::Function>());");
-      o.i().p("Nan::AsyncQueueWorker(new " + workerName() + "(" + paramList(args) + ", cb));");
+      o.i().p(workerName() + "* w = new " + workerName() + "(" + paramList(args) + ");");
+      o.i().p("w->Queue();");
+      o.i().p("return info.Env().Undefined();");
     }
   }
 }
