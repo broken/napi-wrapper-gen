@@ -36,10 +36,9 @@ public class FunctionType extends CppType {
   private void outputUnwrapLocal(String from, String to) {
     // First unwrap into a Nan::Callback
     String f = to + "Fn";
-    o.i().p("Nan::Callback " + f + ";");
-    o.i().p(f + ".Reset(" + from + ".As<v8::Function>());");
+    o.i().p("Napi::Function " + f + " = " + from + ".As<Napi::Function>();");
     // Next create a normal callback function to pass to method
-    o.i().p("auto " + to + " = [&" + f + "](", false);
+    o.i().p("auto " + to + " = [&info, &" + f + "](", false);
     for (int i = 0; i < generics.size(); ++i) {
       CppType t = generics.get(i);
       if (i > 0) o.p(", ", false);
@@ -51,21 +50,14 @@ public class FunctionType extends CppType {
     }
     o.p(") {");
     o.incIndent();
-    // Wrap values & add to array of args
-    for (int i = 0; i < generics.size(); ++i) {
-      CppType t = generics.get(i);
-      o.i().p("v8::Local<v8::Value> v" + i + " = ", false);
-      t.outputWrap("p" + i);
-      o.p(";");
-    }
-    o.i().p("v8::Local<v8::Value> argv[] = {", false);
-    for (int i = 0; i < generics.size(); ++i) {
-      if (i > 0) o.p(", ", false);
-      o.p("v" + i, false);
-    }
-    o.p("};");
     // Finally call the v8 callback from inside our c callback
-    o.i().p(f + ".Call(" + generics.size() + ", " + "argv);");
+    o.i().p(f + ".Call(info.Env().Global(), {", false);
+    for (int i = 0; i < generics.size(); ++i) {
+      if (i > 0) o.p(", ");
+      CppType t = generics.get(i);
+      t.outputWrap("p" + i);
+    }
+    o.p("});");
     o.decIndent().i().p("};");
   }
 }
