@@ -18,6 +18,12 @@ public class TimeTType extends CppType {
 
   @Override
   public void outputUnwrap(String from, String to) {
+    o.i().p("if (!" + from + ".IsNumber()) {").incIndent();
+    o.i().p("Napi::TypeError::New(info.Env(), \"TypeError: Number/time expected (for " + from + ")\").ThrowAsJavaScriptException();");
+    o.i().p("return", false);
+    if (!isInVoidMethod) o.p(" info.Env().Null()", false);
+    o.p(";");
+    o.decIndent().i().p("}");
     o.i().p("time_t " + to + "(" + from + ".As<Napi::Number>().Int32Value() / 1000);");
   }
 }

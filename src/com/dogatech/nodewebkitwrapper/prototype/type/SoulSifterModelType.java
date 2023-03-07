@@ -53,6 +53,12 @@ public class SoulSifterModelType extends CppType {
 
   @Override
   public void outputUnwrap(String from, String to) {
+    o.i().p("if (!" + from + ".IsObject()) {").incIndent();
+    o.i().p("Napi::TypeError::New(info.Env(), \"TypeError: Object expected (for " + from + ")\").ThrowAsJavaScriptException();");
+    o.i().p("return", false);
+    if (!isInVoidMethod) o.p(" info.Env().Null()", false);
+    o.p(";");
+    o.decIndent().i().p("}");
     if (isPointer()) {
       o.i().p(fullName() + "* " + to + "(Napi::ObjectWrap<" + name + ">::Unwrap(" + from + ".As<Napi::Object>())->getWrappedValue());");
     } else {

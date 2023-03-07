@@ -18,6 +18,12 @@ public abstract class CppType {
   List<String> modifiers = new ArrayList<String>();
   protected CppClass cppClass;
   protected Outputter o;
+  public boolean isInVoidMethod = false;
+
+  public void setIsInVoidMethod(boolean val) {
+    isInVoidMethod = val;
+    for (CppType t : generics) t.setIsInVoidMethod(val);
+  }
 
   /** Returns true if this object can handle the given type string */
   public abstract boolean isType(String name);

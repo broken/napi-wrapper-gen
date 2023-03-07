@@ -43,12 +43,17 @@ public class VectorType extends CppType { //TODO
 
   @Override
   public void outputUnwrap(String from, String to) {
+    o.i().p("if (!" + from + ".IsArray()) {").incIndent();
+    o.i().p("Napi::TypeError::New(info.Env(), \"TypeError: Array expected (for " + from + ")\").ThrowAsJavaScriptException();");
+    o.i().p("return", false);
+    if (!isInVoidMethod) o.p(" info.Env().Null()", false);
+    o.p(";");
+    o.decIndent().i().p("}");
     String a = to + "Array";
     o.i().p("Napi::Array " + a + " = " + from + ".As<Napi::Array>();");
     o.i().p(fullName() + " " + to + ";");
     o.i().p("for (uint32_t i = 0; i < " + a + ".Length(); ++i) {").incIndent();
-    o.i().p("Napi::Value tmp = " + a + ".Get(i);");
-    generics.get(0).outputUnwrap("tmp", "x");
+    generics.get(0).outputUnwrap(a + ".Get(i)", "x");
     o.i().p(to + (isPointer() ? "->" : ".") + "push_back(x);");
     o.decIndent().i().p("}");
   }

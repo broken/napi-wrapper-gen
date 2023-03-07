@@ -23,6 +23,12 @@ public class FunctionType extends CppType {
 
   @Override
   public void outputUnwrap(String from, String to) {
+    o.i().p("if (!" + from + ".IsFunction()) {").incIndent();
+    o.i().p("Napi::TypeError::New(info.Env(), \"TypeError: Function expected (for " + from + ")\").ThrowAsJavaScriptException();");
+    o.i().p("return", false);
+    if (!isInVoidMethod) o.p(" info.Env().Null()", false);
+    o.p(";");
+    o.decIndent().i().p("}");
     if (generics.size() == 1 && generics.get(0).name.equals("float"))
       outputUnwrapAsync(from, to);
     else

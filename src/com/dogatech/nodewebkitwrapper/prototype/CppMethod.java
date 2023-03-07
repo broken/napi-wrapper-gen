@@ -8,6 +8,7 @@ import com.dogatech.nodewebkitwrapper.io.Outputter;
 import com.dogatech.nodewebkitwrapper.prototype.type.CppType;
 import com.dogatech.nodewebkitwrapper.prototype.type.CppTypeFactory;
 import com.dogatech.nodewebkitwrapper.prototype.type.FunctionType;
+import com.dogatech.nodewebkitwrapper.prototype.type.VoidType;
 
 
 public class CppMethod {
@@ -22,6 +23,7 @@ public class CppMethod {
   private Outputter o;
   public boolean broken;
   public boolean isAsync;
+  public int minNumArgs;
 
   public CppMethod(CppClass parentClass, nodewebkitwrapperParser.MethodContext ctx, Outputter out) {
     isStatic = ctx.STATIC() != null;
@@ -29,11 +31,13 @@ public class CppMethod {
     name = ctx.Identifier().toString();
     cppClass = parentClass;
     o = out;
+    minNumArgs = 0;
     returnType = CppTypeFactory.instance().createType(ctx.type(), cppClass, o);
     for (nodewebkitwrapperParser.ParameterContext p : ctx.parameterList().parameter()) {
       CppType t = CppTypeFactory.instance().createType(p.type(), cppClass, o);
       args.add(t);
       if (isProgressCallback(t)) isAsync = true;
+      if (p.EQUALS() == null) minNumArgs += 1;
     }
 
     for (MethodType mt : types) {
@@ -51,6 +55,7 @@ public class CppMethod {
     // TODO remove
     isGetter = type instanceof MtGetter;
     isSetter = type instanceof MtSetter;
+    if (isSetter && args.get(0) != null) args.get(0).setIsInVoidMethod(true);
 
     broken = returnType == null || type == null || access == null || args.contains(null);
   }
@@ -79,6 +84,14 @@ public class CppMethod {
     if (broken) return;
     if (isAsync) outputSourceAsyncClass(namespace, cppClass);
     type.out();
+    if (args.size() > 0) {
+      o.i().p("if (info.Length() < " + args.size() + ") {").incIndent();  // TODO: this should be minNumArgs
+      o.i().p("Napi::TypeError::New(info.Env(), \"Expected at least " + minNumArgs + " arguments - received \"  + info.Length()).ThrowAsJavaScriptException();");
+      o.i().p("return", false);
+      if (!isSetter) o.p(" info.Env().Null()", false);
+      o.p(";");
+      o.decIndent().i().p("}");
+    }
     if (!isStatic)
       o.i().p(cppClass.name + "* obj = this;");
     for (int i = 0; i < args.size(); ++i) {
