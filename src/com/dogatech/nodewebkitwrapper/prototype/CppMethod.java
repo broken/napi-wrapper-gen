@@ -55,7 +55,9 @@ public class CppMethod {
     // TODO remove
     isGetter = type instanceof MtGetter;
     isSetter = type instanceof MtSetter;
-    if (isSetter && args.get(0) != null) args.get(0).setIsInVoidMethod(true);
+    if (returnType instanceof VoidType) {
+      for (CppType arg : args) if (arg != null) arg.setIsInVoidMethod(true);
+    }
 
     broken = returnType == null || type == null || access == null || args.contains(null);
   }
@@ -76,7 +78,7 @@ public class CppMethod {
     if (isSetter) {
       o.i().p("void " + name + "(const Napi::CallbackInfo& info, const Napi::Value &value);");
     } else {
-      o.i().p((isStatic ? "static " : "") + "Napi::Value " + name + "(const Napi::CallbackInfo& info);");
+      o.i().p((isStatic ? "static " : "") + (returnType instanceof VoidType ? "void " : "Napi::Value ") + name + "(const Napi::CallbackInfo& info);");
     }
   }
 
@@ -88,7 +90,7 @@ public class CppMethod {
       o.i().p("if (info.Length() < " + args.size() + ") {").incIndent();  // TODO: this should be minNumArgs
       o.i().p("Napi::TypeError::New(info.Env(), \"Expected at least " + minNumArgs + " arguments - received \"  + info.Length()).ThrowAsJavaScriptException();");
       o.i().p("return", false);
-      if (!isSetter) o.p(" info.Env().Null()", false);
+      if (!(returnType instanceof VoidType)) o.p(" info.Env().Null()", false);
       o.p(";");
       o.decIndent().i().p("}");
     }
@@ -208,7 +210,7 @@ public class CppMethod {
       if (isSetter) {
         o.i().p("void " + cppClass.name + "::" + name + "(const Napi::CallbackInfo& info, const Napi::Value &value) {").incIndent();
       } else {
-        o.i().p("Napi::Value " + cppClass.name + "::" + name + "(const Napi::CallbackInfo& info) {").incIndent();
+        o.i().p((returnType instanceof VoidType ? "void " : "Napi::Value ") + cppClass.name + "::" + name + "(const Napi::CallbackInfo& info) {").incIndent();
       }
     }
   }
@@ -299,7 +301,9 @@ public class CppMethod {
     public void out() {
       o.i().p(workerName() + "* w = new " + workerName() + "(" + paramList(args) + ");");
       o.i().p("w->Queue();");
-      o.i().p("return info.Env().Undefined();");
+      o.i().p("return", false);
+      if (!(returnType instanceof VoidType)) o.p(" info.Env().Null()", false);
+      o.p(";");
     }
   }
 }
