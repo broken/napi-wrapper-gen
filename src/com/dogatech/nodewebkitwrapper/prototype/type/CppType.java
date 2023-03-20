@@ -67,7 +67,18 @@ public abstract class CppType {
   }
 
   public String fullName() {
-    return name;
+    StringBuilder sb = new StringBuilder();
+    sb.append(name);
+    if (generics.size() > 0) {
+      sb.append("<");
+      for (int i = 0; i < generics.size(); ++i) {
+        if (i > 0) sb.append(", ");
+        sb.append(generics.get(i).fullName());
+      }
+      sb.append(">");
+    }
+    for (String m : modifiers) sb.append(m);
+    return sb.toString();
   }
 
   public boolean isPointer() {
