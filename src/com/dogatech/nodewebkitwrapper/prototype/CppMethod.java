@@ -8,6 +8,7 @@ import com.dogatech.nodewebkitwrapper.io.Outputter;
 import com.dogatech.nodewebkitwrapper.prototype.type.CppType;
 import com.dogatech.nodewebkitwrapper.prototype.type.CppTypeFactory;
 import com.dogatech.nodewebkitwrapper.prototype.type.FunctionType;
+import com.dogatech.nodewebkitwrapper.prototype.type.FutureType;
 import com.dogatech.nodewebkitwrapper.prototype.type.VoidType;
 
 
@@ -23,6 +24,7 @@ public class CppMethod {
   private Outputter o;
   public boolean broken;
   public boolean isAsync;
+  public boolean hasProgressCallback;
   public int minNumArgs;
 
   public CppMethod(CppClass parentClass, nodewebkitwrapperParser.MethodContext ctx, Outputter out) {
@@ -32,11 +34,14 @@ public class CppMethod {
     cppClass = parentClass;
     o = out;
     minNumArgs = 0;
+    isAsync = false;
+    hasProgressCallback = false;
     returnType = CppTypeFactory.instance().createType(ctx.type(), cppClass, o);
+    if (returnType instanceof FutureType) isAsync = true;
     for (nodewebkitwrapperParser.ParameterContext p : ctx.parameterList().parameter()) {
       CppType t = CppTypeFactory.instance().createType(p.type(), cppClass, o);
       args.add(t);
-      if (isProgressCallback(t)) isAsync = true;
+      if (isProgressCallback(t)) isAsync = hasProgressCallback = true;
       if (p.EQUALS() == null) minNumArgs += 1;
     }
 
@@ -87,12 +92,10 @@ public class CppMethod {
     if (isAsync) outputSourceAsyncClass(namespace, cppClass);
     type.out();
     o.i().p("Napi::Env env = info.Env();");
+    if (type instanceof MtPromise) o.i().p("std::shared_ptr<Napi::Promise::Deferred> deferred = std::make_shared<Napi::Promise::Deferred>(Napi::Promise::Deferred::New(env));");
     if (args.size() > 0) {
       o.i().p("if (info.Length() < " + args.size() + ") {").incIndent();  // TODO: this should be minNumArgs
-      o.i().p("Napi::TypeError::New(env, \"Expected at least " + minNumArgs + " arguments - received \"  + info.Length()).ThrowAsJavaScriptException();");
-      o.i().p("return", false);
-      if (!(returnType instanceof VoidType)) o.p(" env.Null()", false);
-      o.p(";");
+      type.errOut("Expected at least " + minNumArgs + " argument" + (minNumArgs > 1 ? "s" : "") + ".");
       o.decIndent().i().p("}");
     }
     if (!isStatic)
@@ -103,7 +106,7 @@ public class CppMethod {
     }
     returnType.outputResult();
     access.out();
-    if (!returnType.isType("void")) o.p("");
+    if (!(returnType instanceof VoidType) && !(returnType instanceof FutureType)) o.p("");
     returnType.outputReturn();
     o.decIndent().i().p("}");
     o.p("");
@@ -114,60 +117,112 @@ public class CppMethod {
   }
 
   private void outputSourceAsyncClass(String namespace, CppClass cppClass) {
-    o.p("class " + workerName() + " : public Napi::AsyncProgressWorker<float> {");
-    o.p(" public:").incIndent();
-    o.i().p(workerName() + "(", false);      StringBuilder sb = new StringBuilder();
-    int num = 0;
-    for (int i = 0; i < args.size(); ++i) {
-      if (i > 0) sb.append(", ");
-      if (isProgressCallback(args.get(i))) {
-        sb.append("Napi::Function&");
-        num = i;
-      } else {
-        sb.append(args.get(i).name);
+    if (hasProgressCallback) {
+      o.p("class " + workerName() + " : public Napi::AsyncProgressWorker<float> {");
+      o.p(" public:").incIndent();
+      o.i().p(workerName() + "(", false);
+      StringBuilder sb = new StringBuilder();
+      int num = 0;
+      for (int i = 0; i < args.size(); ++i) {
+        if (i > 0) sb.append(", ");
+        if (isProgressCallback(args.get(i))) {
+          sb.append("Napi::Function&");
+          num = i;
+        } else {
+          sb.append(args.get(i).name);
+        }
+        sb.append(" a" + i);
       }
-      sb.append(" a" + i);
-    }
-    sb.append(")");
-    o.p(sb.toString());
-    o.i().p("    : Napi::AsyncProgressWorker<float>(a0) {").incIndent();
-    for (int i = 0; i < args.size(); ++i) {
-      if (!isProgressCallback(args.get(i))) {
-        String arg = type instanceof MtSetter ? "value" : "info[" + i + "]";
+      sb.append(")");
+      o.p(sb.toString());
+      o.i().p("    : Napi::AsyncProgressWorker<float>(a0) {").incIndent();
+      for (int i = 0; i < args.size(); ++i) {
+        if (!isProgressCallback(args.get(i))) {
+          String arg = type instanceof MtSetter ? "value" : "info[" + i + "]";
           args.get(i).outputUnwrap(arg, "a" + i, type);
           o.i().p("arg" + i + " = a" + i + ";");
+        }
       }
-    }
-    o.decIndent().i().p("}");
-    o.p("");
-    o.i().p("~" + workerName() + "() { }");
-    o.p("");
-    o.i().p("void Execute(const Napi::AsyncProgressWorker<float>::ExecutionProgress& ep) {").incIndent();
-    for (int i = 0; i < args.size(); ++i) {
-      if (isProgressCallback(args.get(i))) {
-        o.i().p("auto a" + i, false);
+      o.decIndent().i().p("}");
+      o.p("");
+      o.i().p("~" + workerName() + "() { }");
+      o.p("");
+      o.i().p("void Execute(const Napi::AsyncProgressWorker<float>::ExecutionProgress& ep) {").incIndent();
+      for (int i = 0; i < args.size(); ++i) {
+        if (isProgressCallback(args.get(i))) {
+          o.i().p("auto a" + i, false);
+        }
       }
-    }
-    o.p(" = [&ep](float p) {").incIndent();
-    o.i().p("ep.Send(&p, 1);");
-    o.decIndent().i().p("};");
-    o.i().p("dogatech::soulsifter::" + cppClass.name + "::" + name + "(" + access.paramList(args) + ");");
-    o.decIndent().i().p("}");
-    o.p("");
-    o.i().p("void OnProgress(const float *data, size_t count) {").incIndent();
-    o.i().p("Napi::HandleScope scope(Env());");
-    o.i().p("Callback().Call({Env().Null(), Env().Null(), Napi::Number::New(Env(), *data)});");
-    o.decIndent().i().p("}");
-    o.p("");
-    o.decIndent().i().p(" private:").incIndent();
-    for (int i = 0; i < args.size(); ++i) {
-      if (!isProgressCallback(args.get(i))) {
-        CppType t = args.get(i);
-        o.i().p(t.name + " arg" + i + ";");
+      o.p(" = [&ep](float p) {").incIndent();
+      o.i().p("ep.Send(&p, 1);");
+      o.decIndent().i().p("};");
+      o.i().p("dogatech::soulsifter::" + cppClass.name + "::" + name + "(" + access.paramList(args) + ");");
+      o.decIndent().i().p("}");
+      o.p("");
+      o.i().p("void OnProgress(const float *data, size_t count) {").incIndent();
+      o.i().p("Napi::HandleScope scope(Env());");
+      o.i().p("Callback().Call({Env().Null(), Env().Null(), Napi::Number::New(Env(), *data)});");
+      o.decIndent().i().p("}");
+      o.p("");
+      o.decIndent().i().p(" private:").incIndent();
+      for (int i = 0; i < args.size(); ++i) {
+        if (!isProgressCallback(args.get(i))) {
+          CppType t = args.get(i);
+          o.i().p(t.name + " arg" + i + ";");
+        }
       }
+      o.decIndent().i().p("};");
+      o.p("");
+    } else {
+      o.p("class " + workerName() + " : public Napi::AsyncWorker {");
+      o.p(" public:").incIndent();
+      o.i().p(workerName() + "(Napi::Env env, std::shared_ptr<Napi::Promise::Deferred> d", false);
+      StringBuilder sb = new StringBuilder();
+      int num = 0;
+      for (int i = 0; i < args.size(); ++i) {
+        sb.append(", ");
+        sb.append(args.get(i).fullName(false));
+        sb.append(" a" + i);
+      }
+      sb.append(")");
+      o.p(sb.toString());
+      o.i().p("    : Napi::AsyncWorker(env), deferred(d)", false);
+      for (int i = 0; i < args.size(); ++i) {
+        o.p(", a" + i + "(a" + i + ")", false);
+      }
+      o.p(" {").incIndent();
+      o.decIndent().i().p("}");
+      o.p("");
+      o.i().p("~" + workerName() + "() { }");
+      o.p("");
+      o.i().p("void Execute() {").incIndent();
+      o.i().p("std::future<std::vector<std::string>> result =");
+      o.i().p("    dogatech::soulsifter::" + cppClass.name + "::" + name + "(" + access.paramList(args) + ");");
+      o.i().p("res = result.get();");
+      o.decIndent().i().p("}");
+      o.p("");
+      o.i().p("void OnOK() {").incIndent();
+      o.i().p("Napi::Env env = Env();");
+      o.i().p("Napi::HandleScope scope(env);");
+      returnType.generics.get(0).outputWrap("res", "wrapped_result");
+      o.i().p("deferred->Resolve(wrapped_result);");
+      o.decIndent().i().p("}");
+      o.p("");
+      o.i().p("void OnError() {").incIndent();
+      o.i().p("Napi::Env env = Env();");
+      o.i().p("Napi::HandleScope scope(env);");
+      o.i().p("deferred->Reject(Napi::TypeError::New(env, \"Failed to process async function " + name + "\").Value());");
+      o.decIndent().i().p("}");
+      o.p("");
+      o.decIndent().i().p(" private:").incIndent();
+      o.i().p("std::shared_ptr<Napi::Promise::Deferred> deferred;");
+      o.i().p(returnType.generics.get(0).fullName() + " res;");
+      for (int i = 0; i < args.size(); ++i) {
+        o.i().p(args.get(i).fullName() + " a" + i + ";");
+      }
+      o.decIndent().i().p("};");
+      o.p("");
     }
-    o.decIndent().i().p("};");
-    o.p("");
   }
 
   public void outputDeclaration() {
@@ -204,7 +259,7 @@ public class CppMethod {
   }
 
   private MethodType type;
-  private MethodType[] types = { new MtGetter(), new MtSetter(), new MtGeneric() };
+  private MethodType[] types = { new MtPromise(), new MtGetter(), new MtSetter(), new MtGeneric() };
   public abstract class MethodType implements MethodPart {
     @Override
     public void out() {
@@ -242,6 +297,17 @@ public class CppMethod {
   private class MtGeneric extends MethodType {
     @Override
     public boolean canHandle(nodewebkitwrapperParser.MethodContext ctx) { return true; }
+  }
+  private class MtPromise extends MethodType {
+    @Override
+    public boolean canHandle(nodewebkitwrapperParser.MethodContext ctx) {
+      return returnType instanceof FutureType;
+    }
+    @Override
+    public void errOut(String msg) {
+      o.i().p("deferred->Reject(Napi::String::New(env, \"" + msg + "\"));");
+      o.i().p("return deferred->Promise();");
+    }
   }
 
   private MethodAccess access;
@@ -306,10 +372,13 @@ public class CppMethod {
     }
     @Override
     public void out() {
-      o.i().p(workerName() + "* w = new " + workerName() + "(" + paramList(args) + ");");
+      o.i().p(workerName() + "* w = new " + workerName() + "(", false);
+      if (!hasProgressCallback) o.p("env, deferred, ", false);
+      o.p(paramList(args) + ");");
       o.i().p("w->Queue();");
       o.i().p("return", false);
-      if (!(returnType instanceof VoidType)) o.p(" env.Null()", false);
+      if (returnType instanceof FutureType) o.p(" deferred->Promise()", false);
+      else if (!(returnType instanceof VoidType)) o.p(" env.Null()", false);
       o.p(";");
     }
   }

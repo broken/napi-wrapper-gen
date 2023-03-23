@@ -24,7 +24,8 @@ public class CppTypeFactory {
     new NumberType(),
     new StringType(),
     new TimeTType(),
-    new FunctionType()
+    new FunctionType(),
+    new FutureType()
   };
 
   protected CppTypeFactory() { }

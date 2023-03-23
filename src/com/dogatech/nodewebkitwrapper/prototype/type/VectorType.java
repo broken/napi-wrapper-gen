@@ -25,20 +25,25 @@ public class VectorType extends CppType { //TODO
   }
 
   @Override
-  public void outputReturn() {
-    o.i().p("Napi::Array a = Napi::Array::New(env, static_cast<int>(result" + (isPointer() ? "->" : ".") + "size()));");
-    o.i().p("for (int i = 0; i < (int) result" + (isPointer() ? "->" : ".") + "size(); i++) {").incIndent();
+  public void outputWrap(String from, String to) {
+    o.i().p("Napi::Array " + to + " = Napi::Array::New(env, static_cast<int>(" + from + (isPointer() ? "->" : ".") + "size()));");
+    o.i().p("for (int i = 0; i < (int) " + from + (isPointer() ? "->" : ".") + "size(); i++) {").incIndent();
     CppType t = generics.get(0);
     if (t instanceof SoulSifterModelType) {  // TODO should be generic model
-      t.outputWrap("(" + (isPointer() ? "*" : "") + "result)[i]", !isReference());
-      o.i().p("a.Set(i, instance);").decIndent();
+      t.outputWrap("(" + (isPointer() ? "*" : "") + from + ")[i]", !isReference());
+      o.i().p(to + ".Set(i, instance);").decIndent();
     } else {
-      o.i().p("a.Set(i, ", false);
-      t.outputWrap((isPointer() ? "*" : "") + "result[i]");
+      o.i().p(to + ".Set(i, ", false);
+      t.outputWrap((isPointer() ? "*" : "") + from + "[i]");
       o.p(");").decIndent();
     }
     o.i().p("}");
-    if (isPointer()) o.i().p("delete result;");
+    if (isPointer()) o.i().p("delete " + from + ";");
+  }
+
+  @Override
+  public void outputReturn() {
+    outputWrap("result", "a");
     o.i().p("return a;");
   }
 

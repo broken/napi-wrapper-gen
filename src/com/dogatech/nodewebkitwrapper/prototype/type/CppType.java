@@ -35,7 +35,7 @@ public abstract class CppType {
 
   /** Writes to the Outputter how this object should be returned from a call. */
   public void outputResult() {
-    o.i().p((isConst ? "const " : "") + name + " result =", false);
+    o.i().p((isConst ? "const " : "") + fullName(false) + " result =", false);
   }
 
   /** Writes to the Outputter how this type should be wrapped are returned. */
@@ -54,7 +54,11 @@ public abstract class CppType {
     outputWrap(var);
   }
 
-  public void outputUnwrap(String from, String to) {
+  public void outputWrap(String var, String to) {
+    o.i().p("auto " + to + " = ", false);
+    outputWrap(var);
+  }
+
   public void outputUnwrap(String from, String to, CppMethod.MethodType mt) {
     o.i().p("/* not implemented */");
   }
@@ -68,6 +72,10 @@ public abstract class CppType {
   }
 
   public String fullName() {
+    return fullName(true);
+  }
+
+  public String fullName(boolean incRef) {
     StringBuilder sb = new StringBuilder();
     sb.append(name);
     if (generics.size() > 0) {
@@ -78,7 +86,10 @@ public abstract class CppType {
       }
       sb.append(">");
     }
-    for (String m : modifiers) sb.append(m);
+    for (String m : modifiers) {
+      if (!incRef && m.equals("&")) continue;
+      sb.append(m);
+    }
     return sb.toString();
   }
 
