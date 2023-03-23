@@ -218,7 +218,7 @@ public class CppMethod {
       o.i().p("std::shared_ptr<Napi::Promise::Deferred> deferred;");
       o.i().p(returnType.generics.get(0).fullName() + " res;");
       for (int i = 0; i < args.size(); ++i) {
-        o.i().p(args.get(i).fullName() + " a" + i + ";");
+        o.i().p(args.get(i).fullName(false) + " a" + i + ";");
       }
       o.decIndent().i().p("};");
       o.p("");
