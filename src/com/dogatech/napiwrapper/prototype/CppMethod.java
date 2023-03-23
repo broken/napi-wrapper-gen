@@ -60,9 +60,6 @@ public class CppMethod {
     // TODO remove
     isGetter = type instanceof MtGetter;
     isSetter = type instanceof MtSetter;
-    if (returnType instanceof VoidType) {
-      for (CppType arg : args) if (arg != null) arg.setIsInVoidMethod(true);
-    }
 
     broken = returnType == null || type == null || access == null || args.contains(null);
   }

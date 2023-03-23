@@ -56,12 +56,6 @@ public class SourceWrapperListener extends BaseWrapperListener {
     o.i().p(cppClass.name.toLowerCase() + " = v;");
     o.i().p("ownWrappedObject = own;");
     o.decIndent().i().p("}");
-    // o.p("");
-    // o.p("");
-    // o.i().p("v8::Local<v8::Object> " + cppClass.name + "::NewInstance() {").incIndent();
-    // o.i().p("v8::Local<v8::Function> cons = Nan::New<v8::Function>(constructor);");
-    // o.i().p("return Nan::NewInstance(cons).ToLocalChecked();");
-    // o.decIndent().i().p("}");
     o.p("");
     o.i().p("Napi::Object " + cppClass.name + "::Init(Napi::Env env, Napi::Object exports) {").incIndent();
     o.i().p("Napi::Function func = DefineClass(env, \"" + cppClass.name + "\", {").incIndent();

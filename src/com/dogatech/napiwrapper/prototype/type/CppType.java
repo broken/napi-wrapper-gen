@@ -18,12 +18,6 @@ public abstract class CppType {
   List<String> modifiers = new ArrayList<String>();
   protected CppClass cppClass;
   protected Outputter o;
-  public boolean isInVoidMethod = false;
-
-  public void setIsInVoidMethod(boolean val) {
-    isInVoidMethod = val;
-    for (CppType t : generics) t.setIsInVoidMethod(val);
-  }
 
   /** Returns true if this object can handle the given type string */
   public abstract boolean isType(String name);
@@ -33,12 +27,12 @@ public abstract class CppType {
     return isType(ctx.Identifier().toString());
   }
 
-  /** Writes to the Outputter how this object should be returned from a call. */
+  /** Writes to the Outputter how this object should accept a return from a call. */
   public void outputResult() {
     o.i().p((isConst ? "const " : "") + fullName(false) + " result =", false);
   }
 
-  /** Writes to the Outputter how this type should be wrapped are returned. */
+  /** Writes to the Outputter how this type should be wrapped and returned. */
   public void outputReturn() {
     o.i().p("return ", false);
     outputWrap("result");
@@ -59,10 +53,12 @@ public abstract class CppType {
     outputWrap(var);
   }
 
+  /** Returns a string for how this object is unwrapped. MethodType is used for errors. */
   public void outputUnwrap(String from, String to, CppMethod.MethodType mt) {
     o.i().p("/* not implemented */");
   }
 
+  /** Returns a set of header files required for this type. */
   public Set<String> requiredHeaders() {
     Set<String> s = new HashSet<String>();
     for (CppType t : generics) {
@@ -71,6 +67,7 @@ public abstract class CppType {
     return s;
   }
 
+  /** Returns the full name of this type including generics & modifiers. */
   public String fullName() {
     return fullName(true);
   }
