@@ -31,6 +31,13 @@ Dislaimer Section
 4. Please submit patches if you used/improved this. Or, let me know if you have run across a better tool, and I'll point to it from this doc.
 
 
+For new projects
+----------------
+Create a main class that lists the files to process. See SoulSifterWrapperTool.java
+
+Update the build.xml to point to your new tool file.
+
+
 How to run
 ----------
 ant all
