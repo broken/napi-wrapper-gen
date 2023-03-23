@@ -86,11 +86,12 @@ public class CppMethod {
     if (broken) return;
     if (isAsync) outputSourceAsyncClass(namespace, cppClass);
     type.out();
+    o.i().p("Napi::Env env = info.Env();");
     if (args.size() > 0) {
       o.i().p("if (info.Length() < " + args.size() + ") {").incIndent();  // TODO: this should be minNumArgs
-      o.i().p("Napi::TypeError::New(info.Env(), \"Expected at least " + minNumArgs + " arguments - received \"  + info.Length()).ThrowAsJavaScriptException();");
+      o.i().p("Napi::TypeError::New(env, \"Expected at least " + minNumArgs + " arguments - received \"  + info.Length()).ThrowAsJavaScriptException();");
       o.i().p("return", false);
-      if (!(returnType instanceof VoidType)) o.p(" info.Env().Null()", false);
+      if (!(returnType instanceof VoidType)) o.p(" env.Null()", false);
       o.p(";");
       o.decIndent().i().p("}");
     }
@@ -302,7 +303,7 @@ public class CppMethod {
       o.i().p(workerName() + "* w = new " + workerName() + "(" + paramList(args) + ");");
       o.i().p("w->Queue();");
       o.i().p("return", false);
-      if (!(returnType instanceof VoidType)) o.p(" info.Env().Null()", false);
+      if (!(returnType instanceof VoidType)) o.p(" env.Null()", false);
       o.p(";");
     }
   }

@@ -24,9 +24,9 @@ public class FunctionType extends CppType {
   @Override
   public void outputUnwrap(String from, String to) {
     o.i().p("if (!" + from + ".IsFunction()) {").incIndent();
-    o.i().p("Napi::TypeError::New(info.Env(), \"TypeError: Function expected (for " + from + ")\").ThrowAsJavaScriptException();");
+    o.i().p("Napi::TypeError::New(env, \"TypeError: Function expected (for " + from + ")\").ThrowAsJavaScriptException();");
     o.i().p("return", false);
-    if (!isInVoidMethod) o.p(" info.Env().Null()", false);
+    if (!isInVoidMethod) o.p(" env.Null()", false);
     o.p(";");
     o.decIndent().i().p("}");
     if (generics.size() == 1 && generics.get(0).name.equals("float"))
@@ -44,7 +44,7 @@ public class FunctionType extends CppType {
     String f = to + "Fn";
     o.i().p("Napi::Function " + f + " = " + from + ".As<Napi::Function>();");
     // Next create a normal callback function to pass to method
-    o.i().p("auto " + to + " = [&info, &" + f + "](", false);
+    o.i().p("auto " + to + " = [&env, &" + f + "](", false);
     for (int i = 0; i < generics.size(); ++i) {
       CppType t = generics.get(i);
       if (i > 0) o.p(", ", false);
@@ -57,7 +57,7 @@ public class FunctionType extends CppType {
     o.p(") {");
     o.incIndent();
     // Finally call the v8 callback from inside our c callback
-    o.i().p(f + ".Call(info.Env().Global(), {", false);
+    o.i().p(f + ".Call(env.Global(), {", false);
     for (int i = 0; i < generics.size(); ++i) {
       if (i > 0) o.p(", ");
       CppType t = generics.get(i);

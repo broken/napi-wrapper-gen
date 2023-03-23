@@ -25,7 +25,7 @@ public class VectorType extends CppType { //TODO
 
   @Override
   public void outputReturn() {
-    o.i().p("Napi::Array a = Napi::Array::New(info.Env(), static_cast<int>(result" + (isPointer() ? "->" : ".") + "size()));");
+    o.i().p("Napi::Array a = Napi::Array::New(env, static_cast<int>(result" + (isPointer() ? "->" : ".") + "size()));");
     o.i().p("for (int i = 0; i < (int) result" + (isPointer() ? "->" : ".") + "size(); i++) {").incIndent();
     CppType t = generics.get(0);
     if (t instanceof SoulSifterModelType) {  // TODO should be generic model
@@ -44,9 +44,9 @@ public class VectorType extends CppType { //TODO
   @Override
   public void outputUnwrap(String from, String to) {
     o.i().p("if (!" + from + ".IsArray()) {").incIndent();
-    o.i().p("Napi::TypeError::New(info.Env(), \"TypeError: Array expected (for " + from + ")\").ThrowAsJavaScriptException();");
+    o.i().p("Napi::TypeError::New(env, \"TypeError: Array expected (for " + from + ")\").ThrowAsJavaScriptException();");
     o.i().p("return", false);
-    if (!isInVoidMethod) o.p(" info.Env().Null()", false);
+    if (!isInVoidMethod) o.p(" env.Null()", false);
     o.p(";");
     o.decIndent().i().p("}");
     String a = to + "Array";

@@ -22,9 +22,9 @@ public class ResultSetIteratorType extends CppType {
   public void outputReturn() {
     String generic = this.generics.get(0).name;  // we only expect one
     o.i().p("vector<dogatech::soulsifter::" + cppClass.name + "*>* v = result->toVector();");
-    o.i().p("Napi::Array a = Napi::Array::New(info.Env(), static_cast<int>(v->size()));");
+    o.i().p("Napi::Array a = Napi::Array::New(env, static_cast<int>(v->size()));");
     o.i().p("for (int i = 0; i < (int) v->size(); i++) {").incIndent();
-    o.i().p("Napi::Object instance = " + generic + "::NewInstance(info.Env());");
+    o.i().p("Napi::Object instance = " + generic + "::NewInstance(env);");
     o.i().p(generic + "* r = Napi::ObjectWrap<" + generic + ">::Unwrap(instance);");
     o.i().p("r->setWrappedValue((*v)[i], true);");
     o.i().p("a.Set(i, instance);").decIndent();

@@ -32,7 +32,7 @@ public class SoulSifterModelType extends CppType {
   @Override
   public void outputReturn() {
     o.i().p("if (result == NULL) {").incIndent();
-    o.i().p("return info.Env().Null();");
+    o.i().p("return env.Null();");
     o.decIndent().i().p("} else {").incIndent();
     outputWrap("result");
     o.i().p("return instance;");
@@ -46,7 +46,7 @@ public class SoulSifterModelType extends CppType {
 
   @Override
   public void outputWrap(String var, boolean own) {
-    o.i().p("Napi::Object instance = " + name + "::NewInstance(info.Env());");
+    o.i().p("Napi::Object instance = " + name + "::NewInstance(env);");
     o.i().p(name + "* r = Napi::ObjectWrap<" + name + ">::Unwrap(instance);");
     o.i().p("r->setWrappedValue(" + var + ", " + String.valueOf(own) + ");");
   }
@@ -54,9 +54,9 @@ public class SoulSifterModelType extends CppType {
   @Override
   public void outputUnwrap(String from, String to) {
     o.i().p("if (!" + from + ".IsObject()) {").incIndent();
-    o.i().p("Napi::TypeError::New(info.Env(), \"TypeError: Object expected (for " + from + ")\").ThrowAsJavaScriptException();");
+    o.i().p("Napi::TypeError::New(env, \"TypeError: Object expected (for " + from + ")\").ThrowAsJavaScriptException();");
     o.i().p("return", false);
-    if (!isInVoidMethod) o.p(" info.Env().Null()", false);
+    if (!isInVoidMethod) o.p(" env.Null()", false);
     o.p(";");
     o.decIndent().i().p("}");
     if (isPointer()) {
