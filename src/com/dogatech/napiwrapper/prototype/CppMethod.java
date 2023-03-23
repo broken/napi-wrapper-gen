@@ -1,15 +1,15 @@
-package com.dogatech.nodewebkitwrapper.prototype;
+package com.dogatech.napiwrapper.prototype;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
-import com.dogatech.nodewebkitwrapper.io.Outputter;
-import com.dogatech.nodewebkitwrapper.prototype.type.CppType;
-import com.dogatech.nodewebkitwrapper.prototype.type.CppTypeFactory;
-import com.dogatech.nodewebkitwrapper.prototype.type.FunctionType;
-import com.dogatech.nodewebkitwrapper.prototype.type.FutureType;
-import com.dogatech.nodewebkitwrapper.prototype.type.VoidType;
+import com.dogatech.napiwrapper.grammar.napiwrapperParser;
+import com.dogatech.napiwrapper.io.Outputter;
+import com.dogatech.napiwrapper.prototype.type.CppType;
+import com.dogatech.napiwrapper.prototype.type.CppTypeFactory;
+import com.dogatech.napiwrapper.prototype.type.FunctionType;
+import com.dogatech.napiwrapper.prototype.type.FutureType;
+import com.dogatech.napiwrapper.prototype.type.VoidType;
 
 
 public class CppMethod {
@@ -27,7 +27,7 @@ public class CppMethod {
   public boolean hasProgressCallback;
   public int minNumArgs;
 
-  public CppMethod(CppClass parentClass, nodewebkitwrapperParser.MethodContext ctx, Outputter out) {
+  public CppMethod(CppClass parentClass, napiwrapperParser.MethodContext ctx, Outputter out) {
     isStatic = ctx.STATIC() != null;
     isConst = ctx.CONST() != null;
     name = ctx.Identifier().toString();
@@ -38,7 +38,7 @@ public class CppMethod {
     hasProgressCallback = false;
     returnType = CppTypeFactory.instance().createType(ctx.type(), cppClass, o);
     if (returnType instanceof FutureType) isAsync = true;
-    for (nodewebkitwrapperParser.ParameterContext p : ctx.parameterList().parameter()) {
+    for (napiwrapperParser.ParameterContext p : ctx.parameterList().parameter()) {
       CppType t = CppTypeFactory.instance().createType(p.type(), cppClass, o);
       args.add(t);
       if (isProgressCallback(t)) isAsync = hasProgressCallback = true;
@@ -255,7 +255,7 @@ public class CppMethod {
 
   private interface MethodPart {
     public void out();
-    public boolean canHandle(nodewebkitwrapperParser.MethodContext ctx);
+    public boolean canHandle(napiwrapperParser.MethodContext ctx);
   }
 
   private MethodType type;
@@ -278,7 +278,7 @@ public class CppMethod {
   }
   private class MtGetter extends MethodType {
     @Override
-    public boolean canHandle(nodewebkitwrapperParser.MethodContext ctx) {
+    public boolean canHandle(napiwrapperParser.MethodContext ctx) {
       return name.length() > 3
           && name.startsWith("get")
           && name.substring(3,4).equals(name.substring(3,4).toUpperCase())
@@ -287,7 +287,7 @@ public class CppMethod {
   }
   private class MtSetter extends MethodType {
     @Override
-    public boolean canHandle(nodewebkitwrapperParser.MethodContext ctx) {
+    public boolean canHandle(napiwrapperParser.MethodContext ctx) {
       return name.length() > 3
           && name.startsWith("set")
           && name.substring(3,4).equals(name.substring(3,4).toUpperCase())
@@ -296,11 +296,11 @@ public class CppMethod {
   }
   private class MtGeneric extends MethodType {
     @Override
-    public boolean canHandle(nodewebkitwrapperParser.MethodContext ctx) { return true; }
+    public boolean canHandle(napiwrapperParser.MethodContext ctx) { return true; }
   }
   private class MtPromise extends MethodType {
     @Override
-    public boolean canHandle(nodewebkitwrapperParser.MethodContext ctx) {
+    public boolean canHandle(napiwrapperParser.MethodContext ctx) {
       return returnType instanceof FutureType;
     }
     @Override
@@ -330,7 +330,7 @@ public class CppMethod {
   }
   private class MaInstance extends MethodAccess {
     @Override
-    public boolean canHandle(nodewebkitwrapperParser.MethodContext ctx) {
+    public boolean canHandle(napiwrapperParser.MethodContext ctx) {
       return isInstanceOf(cppClass);
     }
     @Override
@@ -346,7 +346,7 @@ public class CppMethod {
   }
   private class MaStatic extends MethodAccess {
     @Override
-    public boolean canHandle(nodewebkitwrapperParser.MethodContext ctx) {
+    public boolean canHandle(napiwrapperParser.MethodContext ctx) {
       return isStatic;
     }
     @Override
@@ -357,7 +357,7 @@ public class CppMethod {
   }
   private class MaGeneric extends MethodAccess {
     @Override
-    public boolean canHandle(nodewebkitwrapperParser.MethodContext ctx) {
+    public boolean canHandle(napiwrapperParser.MethodContext ctx) {
       return true;
     }
     @Override
@@ -367,7 +367,7 @@ public class CppMethod {
   }
   private class MaAsync extends MethodAccess {
     @Override
-    public boolean canHandle(nodewebkitwrapperParser.MethodContext ctx) {
+    public boolean canHandle(napiwrapperParser.MethodContext ctx) {
       return isAsync;
     }
     @Override

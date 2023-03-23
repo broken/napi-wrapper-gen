@@ -1,11 +1,11 @@
-package com.dogatech.nodewebkitwrapper.prototype;
+package com.dogatech.napiwrapper.prototype;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
+import com.dogatech.napiwrapper.grammar.napiwrapperParser;
 
 
 public class CppClass {
@@ -16,7 +16,7 @@ public class CppClass {
   Set<String> setters = new HashSet<String>();
   public boolean hasCopyCtor = false;
 
-  public CppClass(CppNamespace ns, nodewebkitwrapperParser.CppClassContext ctx) {
+  public CppClass(CppNamespace ns, napiwrapperParser.CppClassContext ctx) {
     name = ctx.Identifier().toString();
     namespace = new CppNamespace(ns.toString());
   }

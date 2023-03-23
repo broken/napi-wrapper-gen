@@ -17,8 +17,8 @@
       <arg value="-o"/>
       <arg value="${srcgen.dir}"/>
       <arg value="-package"/>
-      <arg value="com.dogatech.nodewebkitwrapper.grammar"/>
-      <arg value="${src.dir}/nodewebkitwrapper.g4"/>
+      <arg value="com.dogatech.napiwrapper.grammar"/>
+      <arg value="${src.dir}/napiwrapper.g4"/>
     </exec>
   </target>
 
@@ -35,16 +35,16 @@
 
   <target name="jar">
     <mkdir dir="${jar.dir}"/>
-    <jar destfile="${jar.dir}/SoulSifterNodeWebkitWrapperTool.jar" basedir="build/classes">
+    <jar destfile="${jar.dir}/SoulSifternapiwrapperTool.jar" basedir="build/classes">
       <manifest>
-        <attribute name="Main-Class" value="com.dogatech.soulsifter.nodewebkitwrapper.SoulSifterWrapperTool"/>
+        <attribute name="Main-Class" value="com.dogatech.soulsifter.napiwrapper.SoulSifterWrapperTool"/>
         <attribute name="Class-Path" value="${classpath}"/>
       </manifest>
     </jar>
   </target>
 
   <target name="run">
-    <java jar="${jar.dir}/SoulSifterNodeWebkitWrapperTool.jar" fork="true"/>
+    <java jar="${jar.dir}/SoulSifternapiwrapperTool.jar" fork="true"/>
   </target>
 
   <target name="all">
@@ -69,7 +69,7 @@
       <arg value="-classpath"/>
       <arg value="${classpath}:${classes.dir}"/>
       <arg value="org.antlr.v4.runtime.misc.TestRig"/>
-      <arg value="com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapper"/>
+      <arg value="com.dogatech.napiwrapper.grammar.napiwrapper"/>
       <arg value="header"/>
       <arg value="-gui"/>
       <redirector input="${file}"/>

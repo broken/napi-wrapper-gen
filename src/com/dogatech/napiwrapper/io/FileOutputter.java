@@ -1,4 +1,4 @@
-package com.dogatech.nodewebkitwrapper.io;
+package com.dogatech.napiwrapper.io;
 
 import java.io.IOException;
 import java.io.OutputStream;

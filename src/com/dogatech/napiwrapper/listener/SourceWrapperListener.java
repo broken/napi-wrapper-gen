@@ -1,4 +1,4 @@
-package com.dogatech.nodewebkitwrapper.listener;
+package com.dogatech.napiwrapper.listener;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -14,24 +14,24 @@ import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.NotNull;
 
-import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperBaseListener;
-import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
-import com.dogatech.nodewebkitwrapper.io.Outputter;
-import com.dogatech.nodewebkitwrapper.listener.BaseWrapperListener;
-import com.dogatech.nodewebkitwrapper.prototype.CppClass;
-import com.dogatech.nodewebkitwrapper.prototype.CppNamespace;
-import com.dogatech.nodewebkitwrapper.prototype.CppMethod;
-import com.dogatech.nodewebkitwrapper.prototype.type.CppType;
+import com.dogatech.napiwrapper.grammar.napiwrapperBaseListener;
+import com.dogatech.napiwrapper.grammar.napiwrapperParser;
+import com.dogatech.napiwrapper.io.Outputter;
+import com.dogatech.napiwrapper.listener.BaseWrapperListener;
+import com.dogatech.napiwrapper.prototype.CppClass;
+import com.dogatech.napiwrapper.prototype.CppNamespace;
+import com.dogatech.napiwrapper.prototype.CppMethod;
+import com.dogatech.napiwrapper.prototype.type.CppType;
 
 
 public class SourceWrapperListener extends BaseWrapperListener {
   Set<String> classes = new HashSet<String>();
 
-  public SourceWrapperListener(nodewebkitwrapperParser p, Outputter out) {
+  public SourceWrapperListener(napiwrapperParser p, Outputter out) {
     super(p, out);
   }
 
-  @Override public void exitCppClass(@NotNull nodewebkitwrapperParser.CppClassContext ctx) {
+  @Override public void exitCppClass(@NotNull napiwrapperParser.CppClassContext ctx) {
     o.i().p("#include <napi.h>");
     o.i().p("#include \"" + cppClass.name + "_wrap.h\"");
     SortedSet<String> headers = new TreeSet<String>();

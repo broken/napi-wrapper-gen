@@ -1,14 +1,14 @@
-package com.dogatech.nodewebkitwrapper.prototype.type;
+package com.dogatech.napiwrapper.prototype.type;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
-import com.dogatech.nodewebkitwrapper.io.Outputter;
-import com.dogatech.nodewebkitwrapper.prototype.CppClass;
-import com.dogatech.nodewebkitwrapper.prototype.CppMethod;
+import com.dogatech.napiwrapper.grammar.napiwrapperParser;
+import com.dogatech.napiwrapper.io.Outputter;
+import com.dogatech.napiwrapper.prototype.CppClass;
+import com.dogatech.napiwrapper.prototype.CppMethod;
 
 
 public abstract class CppType {
@@ -29,7 +29,7 @@ public abstract class CppType {
   public abstract boolean isType(String name);
 
   /** Returns true if this object can handle the given type string */
-  public boolean isType(nodewebkitwrapperParser.TypeContext ctx) {
+  public boolean isType(napiwrapperParser.TypeContext ctx) {
     return isType(ctx.Identifier().toString());
   }
 

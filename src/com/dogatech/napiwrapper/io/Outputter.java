@@ -1,4 +1,4 @@
-package com.dogatech.nodewebkitwrapper.io;
+package com.dogatech.napiwrapper.io;
 
 
 public abstract class Outputter {

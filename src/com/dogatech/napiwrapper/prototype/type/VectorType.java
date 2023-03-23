@@ -1,10 +1,10 @@
-package com.dogatech.nodewebkitwrapper.prototype.type;
+package com.dogatech.napiwrapper.prototype.type;
 
 import java.util.ArrayList;
 
-import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
-import com.dogatech.nodewebkitwrapper.io.Outputter;
-import com.dogatech.nodewebkitwrapper.prototype.CppMethod;
+import com.dogatech.napiwrapper.grammar.napiwrapperParser;
+import com.dogatech.napiwrapper.io.Outputter;
+import com.dogatech.napiwrapper.prototype.CppMethod;
 
 
 public class VectorType extends CppType { //TODO
@@ -15,7 +15,7 @@ public class VectorType extends CppType { //TODO
   }
 
   @Override
-  public boolean isType(nodewebkitwrapperParser.TypeContext ctx) {
+  public boolean isType(napiwrapperParser.TypeContext ctx) {
     return isType(ctx.Identifier().toString()) && ctx.Modifier().size() <= 1;
   }
 

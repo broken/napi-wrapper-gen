@@ -1,8 +1,8 @@
-package com.dogatech.soulsifter.nodewebkitwrapper;
+package com.dogatech.soulsifter.napiwrapper;
 
 import java.util.Arrays;
 
-import com.dogatech.nodewebkitwrapper.WrapperTool;
+import com.dogatech.napiwrapper.WrapperTool;
 
 
 public class SoulSifterWrapperTool {

@@ -1,9 +1,9 @@
-package com.dogatech.nodewebkitwrapper.prototype.type;
+package com.dogatech.napiwrapper.prototype.type;
 
 import java.util.Set;
 
-import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
-import com.dogatech.nodewebkitwrapper.io.Outputter;
+import com.dogatech.napiwrapper.grammar.napiwrapperParser;
+import com.dogatech.napiwrapper.io.Outputter;
 
 
 public class ResultSetIteratorType extends CppType {

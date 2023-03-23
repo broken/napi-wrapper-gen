@@ -1,4 +1,4 @@
-package com.dogatech.nodewebkitwrapper.prototype;
+package com.dogatech.napiwrapper.prototype;
 
 import java.util.Iterator;
 import java.util.Stack;

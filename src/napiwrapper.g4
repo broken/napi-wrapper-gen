@@ -2,7 +2,7 @@
  * A C++ header grammar that only analyzes information that would be relevant to
  * a node-webkit wrapper class.
  */
-grammar nodewebkitwrapper;
+grammar napiwrapper;
 
 header: body;
 

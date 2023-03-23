@@ -1,14 +1,14 @@
-package com.dogatech.nodewebkitwrapper.prototype.type;
+package com.dogatech.napiwrapper.prototype.type;
 
 import java.util.LinkedList;
 import java.util.List;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
-import com.dogatech.nodewebkitwrapper.io.Outputter;
-import com.dogatech.nodewebkitwrapper.prototype.CppClass;
-import com.dogatech.nodewebkitwrapper.prototype.CppMethod;
+import com.dogatech.napiwrapper.grammar.napiwrapperParser;
+import com.dogatech.napiwrapper.io.Outputter;
+import com.dogatech.napiwrapper.prototype.CppClass;
+import com.dogatech.napiwrapper.prototype.CppMethod;
 
 
 public class CppTypeFactory {
@@ -37,7 +37,7 @@ public class CppTypeFactory {
     return instance;
   }
 
-  public CppType createType(nodewebkitwrapperParser.TypeContext ctx, CppClass cppClass, Outputter out) {
+  public CppType createType(napiwrapperParser.TypeContext ctx, CppClass cppClass, Outputter out) {
     CppType t = null;
     try {
       for (CppType type : types) {
@@ -56,12 +56,12 @@ public class CppTypeFactory {
       }
     }
     if (t != null && ctx.generic() != null) {
-      nodewebkitwrapperParser.TypeListContext tlc = ctx.generic().typeList();
+      napiwrapperParser.TypeListContext tlc = ctx.generic().typeList();
       // Expect callback functions always return void, so using param types as the "generics".
       if (ctx.generic().fnType() != null) {
         tlc = ctx.generic().fnType().typeList();
       }
-      for (nodewebkitwrapperParser.TypeContext tc : tlc.type()) {
+      for (napiwrapperParser.TypeContext tc : tlc.type()) {
         CppType gt = createType(tc, cppClass, out);
         if (gt == null) return null;
         t.generics.add(gt);

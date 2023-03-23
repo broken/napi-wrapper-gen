@@ -1,4 +1,4 @@
-package com.dogatech.nodewebkitwrapper;
+package com.dogatech.napiwrapper;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -13,11 +13,11 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.FileSystems;
 
-import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperLexer;
-import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
-import com.dogatech.nodewebkitwrapper.io.FileOutputter;
-import com.dogatech.nodewebkitwrapper.listener.HeaderWrapperListener;
-import com.dogatech.nodewebkitwrapper.listener.SourceWrapperListener;
+import com.dogatech.napiwrapper.grammar.napiwrapperLexer;
+import com.dogatech.napiwrapper.grammar.napiwrapperParser;
+import com.dogatech.napiwrapper.io.FileOutputter;
+import com.dogatech.napiwrapper.listener.HeaderWrapperListener;
+import com.dogatech.napiwrapper.listener.SourceWrapperListener;
 
 
 /**
@@ -38,9 +38,9 @@ public class WrapperTool {
 
       ANTLRInputStream input = new ANTLRInputStream(is);
 
-      nodewebkitwrapperLexer lexer = new nodewebkitwrapperLexer(input);
+      napiwrapperLexer lexer = new napiwrapperLexer(input);
       CommonTokenStream tokens = new CommonTokenStream(lexer);
-      nodewebkitwrapperParser parser = new nodewebkitwrapperParser(tokens);
+      napiwrapperParser parser = new napiwrapperParser(tokens);
       ParseTree tree = parser.header(); // parse
 
       ParseTreeWalker walker = new ParseTreeWalker(); // create standard walker

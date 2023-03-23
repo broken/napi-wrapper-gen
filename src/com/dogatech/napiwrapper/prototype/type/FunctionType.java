@@ -1,8 +1,8 @@
-package com.dogatech.nodewebkitwrapper.prototype.type;
+package com.dogatech.napiwrapper.prototype.type;
 
-import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
-import com.dogatech.nodewebkitwrapper.io.Outputter;
-import com.dogatech.nodewebkitwrapper.prototype.CppMethod;
+import com.dogatech.napiwrapper.grammar.napiwrapperParser;
+import com.dogatech.napiwrapper.io.Outputter;
+import com.dogatech.napiwrapper.prototype.CppMethod;
 
 
 public class FunctionType extends CppType {
