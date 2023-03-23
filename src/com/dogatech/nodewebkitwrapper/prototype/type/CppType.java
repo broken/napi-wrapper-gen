@@ -55,6 +55,7 @@ public abstract class CppType {
   }
 
   public void outputUnwrap(String from, String to) {
+  public void outputUnwrap(String from, String to, CppMethod.MethodType mt) {
     o.i().p("/* not implemented */");
   }
 

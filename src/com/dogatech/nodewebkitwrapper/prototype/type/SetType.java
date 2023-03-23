@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
 import com.dogatech.nodewebkitwrapper.io.Outputter;
+import com.dogatech.nodewebkitwrapper.prototype.CppMethod;
 
 
 public class SetType extends VectorType {
@@ -36,19 +37,16 @@ public class SetType extends VectorType {
   }
 
   @Override
-  public void outputUnwrap(String from, String to) {
+  public void outputUnwrap(String from, String to, CppMethod.MethodType mt) {
     o.i().p("if (!" + from + ".IsArray()) {").incIndent();
-    o.i().p("Napi::TypeError::New(env, \"TypeError: Array expected (for " + from + ")\").ThrowAsJavaScriptException();");
-    o.i().p("return", false);
-    if (!isInVoidMethod) o.p(" env.Null()", false);
-    o.p(";");
+    mt.errOut("TypeError: Array expected (for " + from + ")");
     o.decIndent().i().p("}");
     String a = to + "Array";
     o.i().p("v8::Local<v8::Array> " + a + " = v8::Local<v8::Array>::Cast(" + from + ");");
     o.i().p(fullName() + " " + to + ";");
     o.i().p("for (int i = 0; i < " + a + "->Length(); ++i) {").incIndent();
     o.i().p("v8::Local<v8::Value> tmp = " + a + "->Get(Nan::GetCurrentContext(), i).ToLocalChecked();");
-    generics.get(0).outputUnwrap("tmp", "x");
+    generics.get(0).outputUnwrap("tmp", "x", mt);
     o.i().p(to + (isPointer() ? "->" : ".") + "insert(x);");
     o.decIndent().i().p("}");
   }

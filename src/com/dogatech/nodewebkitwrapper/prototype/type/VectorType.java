@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
 import com.dogatech.nodewebkitwrapper.io.Outputter;
+import com.dogatech.nodewebkitwrapper.prototype.CppMethod;
 
 
 public class VectorType extends CppType { //TODO
@@ -42,18 +43,15 @@ public class VectorType extends CppType { //TODO
   }
 
   @Override
-  public void outputUnwrap(String from, String to) {
+  public void outputUnwrap(String from, String to, CppMethod.MethodType mt) {
     o.i().p("if (!" + from + ".IsArray()) {").incIndent();
-    o.i().p("Napi::TypeError::New(env, \"TypeError: Array expected (for " + from + ")\").ThrowAsJavaScriptException();");
-    o.i().p("return", false);
-    if (!isInVoidMethod) o.p(" env.Null()", false);
-    o.p(";");
+    mt.errOut("TypeError: Array expected (for " + from + ")");
     o.decIndent().i().p("}");
     String a = to + "Array";
     o.i().p("Napi::Array " + a + " = " + from + ".As<Napi::Array>();");
     o.i().p(fullName() + " " + to + ";");
     o.i().p("for (uint32_t i = 0; i < " + a + ".Length(); ++i) {").incIndent();
-    generics.get(0).outputUnwrap(a + ".Get(i)", "x");
+    generics.get(0).outputUnwrap(a + ".Get(i)", "x", mt);
     o.i().p(to + (isPointer() ? "->" : ".") + "push_back(x);");
     o.decIndent().i().p("}");
   }

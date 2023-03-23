@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
 import com.dogatech.nodewebkitwrapper.io.Outputter;
+import com.dogatech.nodewebkitwrapper.prototype.CppMethod;
 
 
 public class SoulSifterModelType extends CppType {
@@ -52,12 +53,9 @@ public class SoulSifterModelType extends CppType {
   }
 
   @Override
-  public void outputUnwrap(String from, String to) {
+  public void outputUnwrap(String from, String to, CppMethod.MethodType mt) {
     o.i().p("if (!" + from + ".IsObject()) {").incIndent();
-    o.i().p("Napi::TypeError::New(env, \"TypeError: Object expected (for " + from + ")\").ThrowAsJavaScriptException();");
-    o.i().p("return", false);
-    if (!isInVoidMethod) o.p(" env.Null()", false);
-    o.p(";");
+    mt.errOut("TypeError: Object expected (for " + from + ")");
     o.decIndent().i().p("}");
     if (isPointer()) {
       o.i().p(fullName() + "* " + to + "(Napi::ObjectWrap<" + name + ">::Unwrap(" + from + ".As<Napi::Object>())->getWrappedValue());");

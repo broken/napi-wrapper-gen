@@ -2,6 +2,7 @@ package com.dogatech.nodewebkitwrapper.prototype.type;
 
 import com.dogatech.nodewebkitwrapper.grammar.nodewebkitwrapperParser;
 import com.dogatech.nodewebkitwrapper.io.Outputter;
+import com.dogatech.nodewebkitwrapper.prototype.CppMethod;
 
 
 public class NumberType extends CppType {
@@ -17,12 +18,9 @@ public class NumberType extends CppType {
   }
 
   @Override
-  public void outputUnwrap(String from, String to) {
+  public void outputUnwrap(String from, String to, CppMethod.MethodType mt) {
     o.i().p("if (!" + from + ".IsNumber()) {").incIndent();
-    o.i().p("Napi::TypeError::New(env, \"TypeError: Number expected (for " + from + ")\").ThrowAsJavaScriptException();");
-    o.i().p("return", false);
-    if (!isInVoidMethod) o.p(" env.Null()", false);
-    o.p(";");
+    mt.errOut("TypeError: Number expected (for " + from + ")");
     o.decIndent().i().p("}");
     o.i().p("double " + to + "(" + from + ".As<Napi::Number>().DoubleValue());");
   }

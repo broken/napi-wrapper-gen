@@ -99,7 +99,7 @@ public class CppMethod {
       o.i().p(cppClass.name + "* obj = this;");
     for (int i = 0; i < args.size(); ++i) {
       String arg = type instanceof MtSetter ? "value" : "info[" + i + "]";
-      args.get(i).outputUnwrap(arg, "a" + i);
+      args.get(i).outputUnwrap(arg, "a" + i, type);
     }
     returnType.outputResult();
     access.out();
@@ -134,8 +134,8 @@ public class CppMethod {
     for (int i = 0; i < args.size(); ++i) {
       if (!isProgressCallback(args.get(i))) {
         String arg = type instanceof MtSetter ? "value" : "info[" + i + "]";
-        args.get(i).outputUnwrap(arg, "a" + i);
-        o.i().p("arg" + i + " = a" + i + ";");
+          args.get(i).outputUnwrap(arg, "a" + i, type);
+          o.i().p("arg" + i + " = a" + i + ";");
       }
     }
     o.decIndent().i().p("}");
@@ -205,7 +205,7 @@ public class CppMethod {
 
   private MethodType type;
   private MethodType[] types = { new MtGetter(), new MtSetter(), new MtGeneric() };
-  private abstract class MethodType implements MethodPart {
+  public abstract class MethodType implements MethodPart {
     @Override
     public void out() {
       if (isSetter) {
@@ -213,6 +213,12 @@ public class CppMethod {
       } else {
         o.i().p((returnType instanceof VoidType ? "void " : "Napi::Value ") + cppClass.name + "::" + name + "(const Napi::CallbackInfo& info) {").incIndent();
       }
+    }
+    public void errOut(String msg) {
+      o.i().p("Napi::TypeError::New(env, \"" + msg + "\").ThrowAsJavaScriptException();");
+      o.i().p("return", false);
+      if (!(returnType instanceof VoidType)) o.p(" env.Null()", false);
+      o.p(";");
     }
   }
   private class MtGetter extends MethodType {
