@@ -29,7 +29,7 @@ public abstract class CppType {
 
   /** Writes to the Outputter how this object should accept a return from a call. */
   public void outputResult() {
-    o.i().p((isConst ? "const " : "") + fullName(false) + " result =", false);
+    o.i().p((isConst ? "const " : "") + fullName(true) + " result =", false);
   }
 
   /** Writes to the Outputter how this type should be wrapped and returned. */
@@ -69,10 +69,10 @@ public abstract class CppType {
 
   /** Returns the full name of this type including generics & modifiers. */
   public String fullName() {
-    return fullName(true);
+    return fullName(false);
   }
 
-  public String fullName(boolean incRef) {
+  public String fullName(boolean rmRef) {
     StringBuilder sb = new StringBuilder();
     sb.append(name);
     if (generics.size() > 0) {
@@ -84,7 +84,7 @@ public abstract class CppType {
       sb.append(">");
     }
     for (String m : modifiers) {
-      if (!incRef && m.equals("&")) continue;
+      if (rmRef && m.equals("&")) continue;
       sb.append(m);
     }
     return sb.toString();

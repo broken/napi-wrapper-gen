@@ -64,10 +64,6 @@ public class CppMethod {
     broken = returnType == null || type == null || access == null || args.contains(null);
   }
 
-  public boolean isInstanceOf(CppClass cppClass) {
-    return returnType.name.equals(cppClass.name + "*");
-  }
-
   public String accessor() {
     return name.substring(3,4).toLowerCase() + name.substring(4);
   }
@@ -86,7 +82,9 @@ public class CppMethod {
 
   public void outputSource(String namespace, CppClass cppClass) {
     if (broken) return;
-    if (isAsync) outputSourceAsyncClass(namespace, cppClass);
+    if (isAsync)
+      if (!hasProgressCallback) outputSourceAsyncClass(namespace, cppClass);
+      else outputSourceAsyncProgressClass(namespace, cppClass);
     type.out();
     o.i().p("Napi::Env env = info.Env();");
     if (type instanceof MtPromise) o.i().p("std::shared_ptr<Napi::Promise::Deferred> deferred = std::make_shared<Napi::Promise::Deferred>(Napi::Promise::Deferred::New(env));");
@@ -114,112 +112,112 @@ public class CppMethod {
   }
 
   private void outputSourceAsyncClass(String namespace, CppClass cppClass) {
-    if (hasProgressCallback) {
-      o.p("class " + workerName() + " : public Napi::AsyncProgressWorker<float> {");
-      o.p(" public:").incIndent();
-      o.i().p(workerName() + "(", false);
-      StringBuilder sb = new StringBuilder();
-      int num = 0;
-      for (int i = 0; i < args.size(); ++i) {
-        if (i > 0) sb.append(", ");
-        if (isProgressCallback(args.get(i))) {
-          sb.append("Napi::Function&");
-          num = i;
-        } else {
-          sb.append(args.get(i).name);
-        }
-        sb.append(" a" + i);
-      }
-      sb.append(")");
-      o.p(sb.toString());
-      o.i().p("    : Napi::AsyncProgressWorker<float>(a0) {").incIndent();
-      for (int i = 0; i < args.size(); ++i) {
-        if (!isProgressCallback(args.get(i))) {
-          String arg = type instanceof MtSetter ? "value" : "info[" + i + "]";
-          args.get(i).outputUnwrap(arg, "a" + i, type);
-          o.i().p("arg" + i + " = a" + i + ";");
-        }
-      }
-      o.decIndent().i().p("}");
-      o.p("");
-      o.i().p("~" + workerName() + "() { }");
-      o.p("");
-      o.i().p("void Execute(const Napi::AsyncProgressWorker<float>::ExecutionProgress& ep) {").incIndent();
-      for (int i = 0; i < args.size(); ++i) {
-        if (isProgressCallback(args.get(i))) {
-          o.i().p("auto a" + i, false);
-        }
-      }
-      o.p(" = [&ep](float p) {").incIndent();
-      o.i().p("ep.Send(&p, 1);");
-      o.decIndent().i().p("};");
-      o.i().p("dogatech::soulsifter::" + cppClass.name + "::" + name + "(" + access.paramList(args) + ");");
-      o.decIndent().i().p("}");
-      o.p("");
-      o.i().p("void OnProgress(const float *data, size_t count) {").incIndent();
-      o.i().p("Napi::HandleScope scope(Env());");
-      o.i().p("Callback().Call({Env().Null(), Env().Null(), Napi::Number::New(Env(), *data)});");
-      o.decIndent().i().p("}");
-      o.p("");
-      o.decIndent().i().p(" private:").incIndent();
-      for (int i = 0; i < args.size(); ++i) {
-        if (!isProgressCallback(args.get(i))) {
-          CppType t = args.get(i);
-          o.i().p(t.name + " arg" + i + ";");
-        }
-      }
-      o.decIndent().i().p("};");
-      o.p("");
-    } else {
-      o.p("class " + workerName() + " : public Napi::AsyncWorker {");
-      o.p(" public:").incIndent();
-      o.i().p(workerName() + "(Napi::Env env, std::shared_ptr<Napi::Promise::Deferred> d", false);
-      StringBuilder sb = new StringBuilder();
-      int num = 0;
-      for (int i = 0; i < args.size(); ++i) {
-        sb.append(", ");
-        sb.append(args.get(i).fullName(false));
-        sb.append(" a" + i);
-      }
-      sb.append(")");
-      o.p(sb.toString());
-      o.i().p("    : Napi::AsyncWorker(env), deferred(d)", false);
-      for (int i = 0; i < args.size(); ++i) {
-        o.p(", a" + i + "(a" + i + ")", false);
-      }
-      o.p(" {").incIndent();
-      o.decIndent().i().p("}");
-      o.p("");
-      o.i().p("~" + workerName() + "() { }");
-      o.p("");
-      o.i().p("void Execute() {").incIndent();
-      o.i().p("std::future<std::vector<std::string>> result =");
-      o.i().p("    dogatech::soulsifter::" + cppClass.name + "::" + name + "(" + access.paramList(args) + ");");
-      o.i().p("res = result.get();");
-      o.decIndent().i().p("}");
-      o.p("");
-      o.i().p("void OnOK() {").incIndent();
-      o.i().p("Napi::Env env = Env();");
-      o.i().p("Napi::HandleScope scope(env);");
-      returnType.generics.get(0).outputWrap("res", "wrapped_result");
-      o.i().p("deferred->Resolve(wrapped_result);");
-      o.decIndent().i().p("}");
-      o.p("");
-      o.i().p("void OnError() {").incIndent();
-      o.i().p("Napi::Env env = Env();");
-      o.i().p("Napi::HandleScope scope(env);");
-      o.i().p("deferred->Reject(Napi::TypeError::New(env, \"Failed to process async function " + name + "\").Value());");
-      o.decIndent().i().p("}");
-      o.p("");
-      o.decIndent().i().p(" private:").incIndent();
-      o.i().p("std::shared_ptr<Napi::Promise::Deferred> deferred;");
-      o.i().p(returnType.generics.get(0).fullName() + " res;");
-      for (int i = 0; i < args.size(); ++i) {
-        o.i().p(args.get(i).fullName(false) + " a" + i + ";");
-      }
-      o.decIndent().i().p("};");
-      o.p("");
+    o.p("class " + workerName() + " : public Napi::AsyncWorker {");
+    o.p(" public:").incIndent();
+    o.i().p(workerName() + "(Napi::Env env, std::shared_ptr<Napi::Promise::Deferred> d", false);
+    StringBuilder sb = new StringBuilder();
+    int num = 0;
+    for (int i = 0; i < args.size(); ++i) {
+      sb.append(", ");
+      sb.append(args.get(i).fullName());
+      sb.append(" a" + i);
     }
+    sb.append(")");
+    o.p(sb.toString());
+    o.i().p("    : Napi::AsyncWorker(env), deferred(d)", false);
+    for (int i = 0; i < args.size(); ++i) {
+      o.p(", a" + i + "(a" + i + ")", false);
+    }
+    o.p(" {").incIndent();
+    o.decIndent().i().p("}");
+    o.p("");
+    o.i().p("~" + workerName() + "() { }");
+    o.p("");
+    o.i().p("void Execute() {").incIndent();
+    o.i().p("std::future<std::vector<std::string>> result =");
+    o.i().p("    dogatech::soulsifter::" + cppClass.name + "::" + name + "(" + access.paramList(args) + ");");
+    o.i().p("res = result.get();");
+    o.decIndent().i().p("}");
+    o.p("");
+    o.i().p("void OnOK() {").incIndent();
+    o.i().p("Napi::Env env = Env();");
+    o.i().p("Napi::HandleScope scope(env);");
+    returnType.generics.get(0).outputWrap("res", "wrapped_result");
+    o.i().p("deferred->Resolve(wrapped_result);");
+    o.decIndent().i().p("}");
+    o.p("");
+    o.i().p("void OnError() {").incIndent();
+    o.i().p("Napi::Env env = Env();");
+    o.i().p("Napi::HandleScope scope(env);");
+    o.i().p("deferred->Reject(Napi::TypeError::New(env, \"Failed to process async function " + name + "\").Value());");
+    o.decIndent().i().p("}");
+    o.p("");
+    o.decIndent().i().p(" private:").incIndent();
+    o.i().p("std::shared_ptr<Napi::Promise::Deferred> deferred;");
+    o.i().p(returnType.generics.get(0).fullName() + " res;");
+    for (int i = 0; i < args.size(); ++i) {
+      o.i().p(args.get(i).fullName(true) + " a" + i + ";");
+    }
+    o.decIndent().i().p("};");
+    o.p("");
+  }
+
+  private void outputSourceAsyncProgressClass(String namespace, CppClass cppClass) {
+    o.p("class " + workerName() + " : public Napi::AsyncProgressWorker<float> {");
+    o.p(" public:").incIndent();
+    o.i().p(workerName() + "(", false);
+    StringBuilder sb = new StringBuilder();
+    int num = 0;
+    for (int i = 0; i < args.size(); ++i) {
+      if (i > 0) sb.append(", ");
+      if (isProgressCallback(args.get(i))) {
+        sb.append("Napi::Function&");
+        num = i;
+      } else {
+        sb.append(args.get(i).name);
+      }
+      sb.append(" a" + i);
+    }
+    sb.append(")");
+    o.p(sb.toString());
+    o.i().p("    : Napi::AsyncProgressWorker<float>(a0) {").incIndent();
+    for (int i = 0; i < args.size(); ++i) {
+      if (!isProgressCallback(args.get(i))) {
+        String arg = type instanceof MtSetter ? "value" : "info[" + i + "]";
+        args.get(i).outputUnwrap(arg, "a" + i, type);
+        o.i().p("arg" + i + " = a" + i + ";");
+      }
+    }
+    o.decIndent().i().p("}");
+    o.p("");
+    o.i().p("~" + workerName() + "() { }");
+    o.p("");
+    o.i().p("void Execute(const Napi::AsyncProgressWorker<float>::ExecutionProgress& ep) {").incIndent();
+    for (int i = 0; i < args.size(); ++i) {
+      if (isProgressCallback(args.get(i))) {
+        o.i().p("auto a" + i, false);
+      }
+    }
+    o.p(" = [&ep](float p) {").incIndent();
+    o.i().p("ep.Send(&p, 1);");
+    o.decIndent().i().p("};");
+    o.i().p("dogatech::soulsifter::" + cppClass.name + "::" + name + "(" + access.paramList(args) + ");");
+    o.decIndent().i().p("}");
+    o.p("");
+    o.i().p("void OnProgress(const float *data, size_t count) {").incIndent();
+    o.i().p("Napi::HandleScope scope(Env());");
+    o.i().p("Callback().Call({Env().Null(), Env().Null(), Napi::Number::New(Env(), *data)});");
+    o.decIndent().i().p("}");
+    o.p("");
+    o.decIndent().i().p(" private:").incIndent();
+    for (int i = 0; i < args.size(); ++i) {
+      if (!isProgressCallback(args.get(i))) {
+        CppType t = args.get(i);
+        o.i().p(t.name + " arg" + i + ";");
+      }
+    }
+    o.decIndent().i().p("};");
+    o.p("");
   }
 
   public void outputDeclaration() {
@@ -328,7 +326,7 @@ public class CppMethod {
   private class MaInstance extends MethodAccess {
     @Override
     public boolean canHandle(napiwrapperParser.MethodContext ctx) {
-      return isInstanceOf(cppClass);
+      return returnType.name.equals(cppClass.name + "*");
     }
     @Override
     public void out() {
