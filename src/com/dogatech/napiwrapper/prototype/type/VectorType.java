@@ -54,7 +54,7 @@ public class VectorType extends CppType { //TODO
     o.decIndent().i().p("}");
     String a = to + "Array";
     o.i().p("Napi::Array " + a + " = " + from + ".As<Napi::Array>();");
-    o.i().p(fullName() + " " + to + ";");
+    o.i().p(fullName(true) + " " + to + ";");
     o.i().p("for (uint32_t i = 0; i < " + a + ".Length(); ++i) {").incIndent();
     generics.get(0).outputUnwrap(a + ".Get(i)", "x", mt);
     o.i().p(to + (isPointer() ? "->" : ".") + "push_back(x);");
@@ -62,19 +62,22 @@ public class VectorType extends CppType { //TODO
   }
 
   @Override
-  public String fullName() {
+  public String fullName(boolean rmMod) {
     StringBuilder sb = new StringBuilder();
-    sb.append("std::vector<");
-    for (int i = 0; i < generics.size(); ++i) {
-      CppType t = generics.get(i);
-      if (i > 0) sb.append(", ");
-      sb.append(t.fullName());
-      for (String m : t.modifiers) {
+    sb.append("std::vector");
+    if (generics.size() > 0) {
+      sb.append("<");
+      for (int i = 0; i < generics.size(); ++i) {
+        if (i > 0) sb.append(", ");
+        sb.append(generics.get(i).fullName());
+      }
+      sb.append(">");
+    }
+    if (!rmMod) {
+      for (String m : modifiers) {
         sb.append(m);
       }
     }
-    sb.append(">");
-    if (isPointer()) sb.append("*");
     return sb.toString();
   }
 }

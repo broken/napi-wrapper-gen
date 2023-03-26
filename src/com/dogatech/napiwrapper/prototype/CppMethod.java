@@ -9,6 +9,7 @@ import com.dogatech.napiwrapper.prototype.type.CppType;
 import com.dogatech.napiwrapper.prototype.type.CppTypeFactory;
 import com.dogatech.napiwrapper.prototype.type.FunctionType;
 import com.dogatech.napiwrapper.prototype.type.FutureType;
+import com.dogatech.napiwrapper.prototype.type.SoulSifterModelType;
 import com.dogatech.napiwrapper.prototype.type.VoidType;
 
 
@@ -126,7 +127,11 @@ public class CppMethod {
     o.p(sb.toString());
     o.i().p("    : Napi::AsyncWorker(env), deferred(d)", false);
     for (int i = 0; i < args.size(); ++i) {
-      o.p(", a" + i + "(a" + i + ")", false);
+      if (args.get(i) instanceof SoulSifterModelType && args.get(i).isPointer()) {
+        o.p(", a" + i + "x(*a" + i + "), a" + i + "(&a" + i + "x)", false);
+      } else {
+        o.p(", a" + i + "(a" + i + ")", false);
+      }
     }
     o.p(" {").incIndent();
     o.decIndent().i().p("}");
@@ -156,7 +161,12 @@ public class CppMethod {
     o.i().p("std::shared_ptr<Napi::Promise::Deferred> deferred;");
     o.i().p(returnType.generics.get(0).fullName() + " res;");
     for (int i = 0; i < args.size(); ++i) {
-      o.i().p(args.get(i).fullName(true) + " a" + i + ";");
+      if (args.get(i) instanceof SoulSifterModelType && args.get(i).isPointer()) {
+        o.i().p(args.get(i).fullName(true) + " a" + i + "x;");
+        o.i().p(args.get(i).fullName() + " a" + i + ";");
+      } else {
+        o.i().p(args.get(i).fullName(true) + " a" + i + ";");
+      }
     }
     o.decIndent().i().p("};");
     o.p("");

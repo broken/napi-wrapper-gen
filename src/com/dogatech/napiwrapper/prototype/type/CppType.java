@@ -72,7 +72,7 @@ public abstract class CppType {
     return fullName(false);
   }
 
-  public String fullName(boolean rmRef) {
+  public String fullName(boolean rmMod) {
     StringBuilder sb = new StringBuilder();
     sb.append(name);
     if (generics.size() > 0) {
@@ -83,9 +83,10 @@ public abstract class CppType {
       }
       sb.append(">");
     }
-    for (String m : modifiers) {
-      if (rmRef && m.equals("&")) continue;
-      sb.append(m);
+    if (!rmMod) {
+      for (String m : modifiers) {
+        sb.append(m);
+      }
     }
     return sb.toString();
   }
