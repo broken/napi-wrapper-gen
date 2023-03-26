@@ -29,7 +29,7 @@ public abstract class CppType {
 
   /** Writes to the Outputter how this object should accept a return from a call. */
   public void outputResult() {
-    o.i().p((isConst ? "const " : "") + fullName(true) + " result =", false);
+    o.i().p(fullName(true) + " result =", false);
   }
 
   /** Writes to the Outputter how this type should be wrapped and returned. */
@@ -74,6 +74,7 @@ public abstract class CppType {
 
   public String fullName(boolean rmMod) {
     StringBuilder sb = new StringBuilder();
+    if (isConst) sb.append("const ");
     sb.append(name);
     if (generics.size() > 0) {
       sb.append("<");

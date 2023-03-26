@@ -139,7 +139,7 @@ public class CppMethod {
     o.i().p("~" + workerName() + "() { }");
     o.p("");
     o.i().p("void Execute() {").incIndent();
-    o.i().p("std::future<std::vector<std::string>> result =");
+    o.i().p(returnType.fullName() + " result =");
     o.i().p("    dogatech::soulsifter::" + cppClass.name + "::" + name + "(" + access.paramList(args) + ");");
     o.i().p("res = result.get();");
     o.decIndent().i().p("}");
