@@ -46,7 +46,7 @@ public class BaseWrapperListener extends napiwrapperBaseListener {
   }
 
   @Override public void enterConstructor(@NotNull napiwrapperParser.ConstructorContext ctx) {
-    if (ctx.parameterList().parameter().size() == 1 && ctx.parameterList().parameter().get(0).type().Identifier().toString().equals(cppClass.name)) {
+    if (ctx.parameterList().parameter().size() == 1 && ctx.parameterList().parameter().get(0).type(0).Identifier().toString().equals(cppClass.name)) {
       cppClass.hasCopyCtor = true;
     }
   }

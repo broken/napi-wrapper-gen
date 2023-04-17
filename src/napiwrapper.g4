@@ -33,7 +33,7 @@ opMethod: type ( OPEQ | OPLT | OPGT ) parameterList CONST? SEMICOLON ;
 template: TEMPLATE LT TYPENAME Identifier GT;
 
 parameterList: LPAREN (parameter (COMMA parameter)*)? RPAREN;
-parameter: type Identifier (EQUALS (Identifier | Number | EmptyBlock))?;
+parameter: type Identifier (EQUALS (type (LPAREN RPAREN)? | Number | EmptyBlock | Text))?;
 
 cppClass: CLASS Identifier LCBRACE classBlock RCBRACE SEMICOLON;
 
@@ -54,6 +54,7 @@ LT: '<';
 GT: '>';
 SEMICOLON: ';';
 EQUALS: '=';
+DOUBLE_QUOTE: '"';
 
 FRIEND: 'friend' ;
 NAMESPACE: 'namespace' ;
@@ -74,6 +75,7 @@ fragment STAR: '*';
 fragment AMPERSAND: '&';
 
 
+Text: DOUBLE_QUOTE ( Nondigit | Digit )* DOUBLE_QUOTE;
 NamespacePrefix: IdentifierName '::' (NamespacePrefix)?;
 Identifier: NamespacePrefix? IdentifierName;
 fragment IdentifierName: Nondigit ( Nondigit | Digit )*;

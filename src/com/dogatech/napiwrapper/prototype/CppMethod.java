@@ -40,7 +40,7 @@ public class CppMethod {
     returnType = CppTypeFactory.instance().createType(ctx.type(), cppClass, o);
     if (returnType instanceof FutureType) isAsync = true;
     for (napiwrapperParser.ParameterContext p : ctx.parameterList().parameter()) {
-      CppType t = CppTypeFactory.instance().createType(p.type(), cppClass, o);
+      CppType t = CppTypeFactory.instance().createType(p.type(0), cppClass, o);
       args.add(t);
       if (isProgressCallback(t)) isAsync = hasProgressCallback = true;
       if (p.EQUALS() == null) minNumArgs += 1;
