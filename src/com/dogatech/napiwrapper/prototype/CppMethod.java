@@ -219,6 +219,11 @@ public class CppMethod {
     o.i().p("Callback().Call({Env().Null(), Env().Null(), Napi::Number::New(Env(), *data)});");
     o.decIndent().i().p("}");
     o.p("");
+    o.i().p("void OnOK() {").incIndent();
+    o.i().p("Napi::HandleScope scope(Env());");
+    o.i().p("Callback().Call({Env().Null(), Napi::String::New(Env(), \"done\"), Env().Null()});");
+    o.decIndent().i().p("}");
+    o.p("");
     o.decIndent().i().p(" private:").incIndent();
     for (int i = 0; i < args.size(); ++i) {
       if (!isProgressCallback(args.get(i))) {
