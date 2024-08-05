@@ -47,9 +47,6 @@ public class FunctionType extends CppType {
       CppType t = generics.get(i);
       if (i > 0) o.p(", ", false);
       o.p(t.fullName(), false);
-      for (String m : t.modifiers) {
-        o.p(m, false);
-      }
       o.p(" p" + i, false);
     }
     o.p(") {");
