@@ -43,6 +43,7 @@ public class CppMethod {
       CppType t = CppTypeFactory.instance().createType(p.type(0), cppClass, o);
       args.add(t);
       if (isProgressCallback(t)) isAsync = hasProgressCallback = true;
+      if (t instanceof FunctionType && p.Identifier().toString().equals("alertCallback")) ((FunctionType) t).isAlertCallback = true;
       if (p.EQUALS() == null) minNumArgs += 1;
     }
 
