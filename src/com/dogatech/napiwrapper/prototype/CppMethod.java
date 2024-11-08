@@ -88,7 +88,8 @@ public class CppMethod {
       if (!hasProgressCallback) outputSourceAsyncClass(namespace, cppClass);
       else outputSourceAsyncProgressClass(namespace, cppClass);
     type.out();
-    o.i().p("Napi::Env env = info.Env();");
+    if (!(returnType instanceof VoidType) || args.size() > 0)
+      o.i().p("Napi::Env env = info.Env();");
     if (type instanceof MtPromise) o.i().p("std::shared_ptr<Napi::Promise::Deferred> deferred = std::make_shared<Napi::Promise::Deferred>(Napi::Promise::Deferred::New(env));");
     if (args.size() > 0) {
       o.i().p("if (info.Length() < " + args.size() + ") {").incIndent();  // TODO: this should be minNumArgs
