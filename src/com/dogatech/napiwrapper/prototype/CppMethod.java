@@ -153,7 +153,7 @@ public class CppMethod {
     o.i().p("deferred->Resolve(wrapped_result);");
     o.decIndent().i().p("}");
     o.p("");
-    o.i().p("void OnError() {").incIndent();
+    o.i().p("void OnError(const Napi::Error& e) {").incIndent();
     o.i().p("Napi::Env env = Env();");
     o.i().p("Napi::HandleScope scope(env);");
     o.i().p("deferred->Reject(Napi::TypeError::New(env, \"Failed to process async function " + name + "\").Value());");
