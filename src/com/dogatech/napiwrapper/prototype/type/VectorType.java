@@ -34,7 +34,7 @@ public class VectorType extends CppType { //TODO
       o.i().p(to + ".Set(i, instance);").decIndent();
     } else {
       o.i().p(to + ".Set(i, ", false);
-      t.outputWrap((isPointer() ? "*" : "") + from + "[i]");
+      t.outputWrap((isPointer() ? "(*" + from + ")" : from) + "[i]");
       o.p(");").decIndent();
     }
     o.i().p("}");

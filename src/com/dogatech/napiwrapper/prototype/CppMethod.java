@@ -88,8 +88,7 @@ public class CppMethod {
       if (!hasProgressCallback) outputSourceAsyncClass(namespace, cppClass);
       else outputSourceAsyncProgressClass(namespace, cppClass);
     type.out();
-    if (!(returnType instanceof VoidType) || args.size() > 0)
-      o.i().p("Napi::Env env = info.Env();");
+    o.i().p("Napi::Env env = info.Env();");
     if (type instanceof MtPromise) o.i().p("std::shared_ptr<Napi::Promise::Deferred> deferred = std::make_shared<Napi::Promise::Deferred>(Napi::Promise::Deferred::New(env));");
     if (args.size() > 0) {
       o.i().p("if (info.Length() < " + args.size() + ") {").incIndent();  // TODO: this should be minNumArgs
@@ -102,10 +101,16 @@ public class CppMethod {
       String arg = type instanceof MtSetter ? "value" : "info[" + i + "]";
       args.get(i).outputUnwrap(arg, "a" + i, type);
     }
+    o.i().p("try {").incIndent();
     returnType.outputResult();
     access.out();
     if (!(returnType instanceof VoidType) && !(returnType instanceof FutureType)) o.p("");
     returnType.outputReturn();
+    o.decIndent().i().p("} catch (const std::exception& e) {").incIndent();
+    o.i().p("Napi::Error::New(env, e.what()).ThrowAsJavaScriptException();");
+    if (isSetter || returnType instanceof VoidType) o.i().p("return;");
+    else o.i().p("return env.Null();");
+    o.decIndent().i().p("}");
     o.decIndent().i().p("}");
     o.p("");
   }
@@ -141,9 +146,13 @@ public class CppMethod {
     o.i().p("~" + workerName() + "() { }");
     o.p("");
     o.i().p("void Execute() {").incIndent();
+    o.i().p("try {").incIndent();
     o.i().p(returnType.fullName() + " result =");
     o.i().p("    dogatech::soulsifter::" + cppClass.name + "::" + name + "(" + access.paramList(args) + ");");
     o.i().p("res = result.get();");
+    o.decIndent().i().p("} catch (const std::exception& e) {").incIndent();
+    o.i().p("SetError(e.what());");
+    o.decIndent().i().p("}");
     o.decIndent().i().p("}");
     o.p("");
     o.i().p("void OnOK() {").incIndent();
@@ -213,7 +222,11 @@ public class CppMethod {
     o.p(" = [&ep](float p) {").incIndent();
     o.i().p("ep.Send(&p, 1);");
     o.decIndent().i().p("};");
+    o.i().p("try {").incIndent();
     o.i().p("dogatech::soulsifter::" + cppClass.name + "::" + name + "(" + access.paramList(args) + ");");
+    o.decIndent().i().p("} catch (const std::exception& e) {").incIndent();
+    o.i().p("SetError(e.what());");
+    o.decIndent().i().p("}");
     o.decIndent().i().p("}");
     o.p("");
     o.i().p("void OnProgress(const float *data, size_t count) {").incIndent();
@@ -385,7 +398,10 @@ public class CppMethod {
     @Override
     public void out() {
       o.i().p(workerName() + "* w = new " + workerName() + "(", false);
-      if (!hasProgressCallback) o.p("env, deferred, ", false);
+      if (!hasProgressCallback) {
+        o.p("env, deferred", false);
+        if (args.size() > 0) o.p(", ", false);
+      }
       o.p(paramList(args) + ");");
       o.i().p("w->Queue();");
       o.i().p("return", false);

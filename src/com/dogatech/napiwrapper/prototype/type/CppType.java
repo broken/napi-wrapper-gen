@@ -29,7 +29,7 @@ public abstract class CppType {
 
   /** Writes to the Outputter how this object should accept a return from a call. */
   public void outputResult() {
-    o.i().p(fullName(true) + " result =", false);
+    o.i().p(fullName(false) + " result =", false);
   }
 
   /** Writes to the Outputter how this type should be wrapped and returned. */
@@ -51,6 +51,7 @@ public abstract class CppType {
   public void outputWrap(String var, String to) {
     o.i().p("auto " + to + " = ", false);
     outputWrap(var);
+    o.p(";");
   }
 
   /** Returns a string for how this object is unwrapped. MethodType is used for errors. */
