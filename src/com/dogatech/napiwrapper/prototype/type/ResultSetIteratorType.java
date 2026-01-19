@@ -21,6 +21,7 @@ public class ResultSetIteratorType extends CppType {
   @Override
   public void outputReturn() {
     String generic = this.generics.get(0).name;  // we only expect one
+    o.i().p("if (result == nullptr) return Napi::Array::New(env, 0);");
     o.i().p("vector<dogatech::soulsifter::" + cppClass.name + "*>* v = result->toVector();");
     o.i().p("Napi::Array a = Napi::Array::New(env, static_cast<int>(v->size()));");
     o.i().p("for (int i = 0; i < (int) v->size(); i++) {").incIndent();
