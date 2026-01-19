@@ -165,7 +165,7 @@ public class CppMethod {
     o.i().p("void OnError(const Napi::Error& e) {").incIndent();
     o.i().p("Napi::Env env = Env();");
     o.i().p("Napi::HandleScope scope(env);");
-    o.i().p("deferred->Reject(Napi::TypeError::New(env, \"Failed to process async function " + name + "\").Value());");
+    o.i().p("deferred->Reject(e.Value());");
     o.decIndent().i().p("}");
     o.p("");
     o.decIndent().i().p(" private:").incIndent();
@@ -237,6 +237,11 @@ public class CppMethod {
     o.i().p("void OnOK() {").incIndent();
     o.i().p("Napi::HandleScope scope(Env());");
     o.i().p("Callback().Call({Env().Null(), Napi::String::New(Env(), \"done\"), Env().Null()});");
+    o.decIndent().i().p("}");
+    o.p("");
+    o.i().p("void OnError(const Napi::Error& e) {").incIndent();
+    o.i().p("Napi::HandleScope scope(Env());");
+    o.i().p("Callback().Call({e.Value(), Env().Null(), Env().Null()});");
     o.decIndent().i().p("}");
     o.p("");
     o.decIndent().i().p(" private:").incIndent();
