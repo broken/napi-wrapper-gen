@@ -42,7 +42,7 @@ public class SoulSifterModelType extends CppType {
 
   @Override
   public void outputWrap(String var) {
-    outputWrap(var, name.equals(cppClass.name));
+    outputWrap(var, name.equals(cppClass.name) || var.equals("dupe"));
   }
 
   @Override
