@@ -59,11 +59,11 @@ public class CppMethod {
         break;
       }
     }
+    broken = returnType == null || type == null || access == null || args.contains(null)
+        || (returnType instanceof SoulSifterModelType && returnType.isConst);
     // TODO remove
-    isGetter = type instanceof MtGetter;
-    isSetter = type instanceof MtSetter;
-
-    broken = returnType == null || type == null || access == null || args.contains(null);
+    isGetter = !broken && type instanceof MtGetter;
+    isSetter = !broken && type instanceof MtSetter;
   }
 
   public String accessor() {

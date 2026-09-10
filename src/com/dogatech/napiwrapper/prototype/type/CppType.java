@@ -12,7 +12,7 @@ import com.dogatech.napiwrapper.prototype.CppMethod;
 
 
 public abstract class CppType {
-  protected boolean isConst;
+  public boolean isConst;
   public String name;
   public List<CppType> generics = new ArrayList<CppType>();
   List<String> modifiers = new ArrayList<String>();
