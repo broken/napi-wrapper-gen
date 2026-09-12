@@ -49,9 +49,7 @@ public abstract class CppType {
   }
 
   public void outputWrap(String var, String to) {
-    o.i().p("auto " + to + " = ", false);
-    outputWrap(var);
-    o.p(";");
+    o.i().p("/* not implemented */");
   }
 
   /** Returns a string for how this object is unwrapped. MethodType is used for errors. */

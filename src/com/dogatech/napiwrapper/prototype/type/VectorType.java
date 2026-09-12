@@ -25,18 +25,18 @@ public class VectorType extends CppType { //TODO
   }
 
   @Override
-  public void outputWrap(String from, String to) {
+  public void outputWrap(String var, String to) {
     String accessor = isPointer() ? "->" : ".";
     if (isPointer()) {
-      o.i().p("Napi::Array " + to + " = Napi::Array::New(env, " + from + " ? static_cast<int>(" + from + "->size()) : 0);");
-      o.i().p("if (" + from + ") {").incIndent();
+      o.i().p("Napi::Array " + to + " = Napi::Array::New(env, " + var + " ? static_cast<int>(" + var + "->size()) : 0);");
+      o.i().p("if (" + var + ") {").incIndent();
     } else {
-      o.i().p("Napi::Array " + to + " = Napi::Array::New(env, static_cast<int>(" + from + ".size()));");
+      o.i().p("Napi::Array " + to + " = Napi::Array::New(env, static_cast<int>(" + var + ".size()));");
     }
 
-    o.i().p("for (int i = 0; i < (int) " + from + accessor + "size(); i++) {").incIndent();
+    o.i().p("for (int i = 0; i < (int) " + var + accessor + "size(); i++) {").incIndent();
     CppType t = generics.get(0);
-    String derefFrom = isPointer() ? "(*" + from + ")" : from;
+    String derefFrom = isPointer() ? "(*" + var + ")" : var;
     if (t instanceof SoulSifterModelType) {  // TODO should be generic model
       t.outputWrap(derefFrom + "[i]", !isReference());
       o.i().p(to + ".Set(i, instance);").decIndent();
@@ -49,7 +49,7 @@ public class VectorType extends CppType { //TODO
 
     if (isPointer()) {
       o.decIndent().i().p("}");
-      o.i().p("delete " + from + ";");
+      o.i().p("delete " + var + ";");
     }
   }
 
@@ -60,12 +60,12 @@ public class VectorType extends CppType { //TODO
   }
 
   @Override
-  public void outputUnwrap(String from, String to, CppMethod.MethodType mt) {
-    o.i().p("if (!" + from + ".IsArray()) {").incIndent();
-    mt.errOut("TypeError: Array expected (for " + from + ")");
+  public void outputUnwrap(String var, String to, CppMethod.MethodType mt) {
+    o.i().p("if (!" + var + ".IsArray()) {").incIndent();
+    mt.errOut("TypeError: Array expected (for " + var + ")");
     o.decIndent().i().p("}");
     String a = to + "Array";
-    o.i().p("Napi::Array " + a + " = " + from + ".As<Napi::Array>();");
+    o.i().p("Napi::Array " + a + " = " + var + ".As<Napi::Array>();");
     o.i().p(fullName(true) + " " + to + ";");
     o.i().p("for (uint32_t i = 0; i < " + a + ".Length(); ++i) {").incIndent();
     generics.get(0).outputUnwrap(a + ".Get(i)", "x", mt);

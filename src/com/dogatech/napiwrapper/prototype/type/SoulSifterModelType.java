@@ -47,8 +47,17 @@ public class SoulSifterModelType extends CppType {
 
   @Override
   public void outputWrap(String var, boolean own) {
-    o.i().p("Napi::Object instance = " + name + "::NewInstance(env);");
-    o.i().p(name + "* r = Napi::ObjectWrap<" + name + ">::Unwrap(instance);");
+    outputWrap(var, "instance", own);
+  }
+
+  @Override
+  public void outputWrap(String var, String to) {
+    outputWrap(var, to, name.equals(cppClass.name) || var.equals("dupe"));
+  }
+
+  public void outputWrap(String var, String to, boolean own) {
+    o.i().p("Napi::Object " + to + " = " + name + "::NewInstance(env);");
+    o.i().p(name + "* r = Napi::ObjectWrap<" + name + ">::Unwrap(" + to + ");");
     o.i().p("r->setWrappedValue(" + var + ", " + String.valueOf(own) + ");");
   }
 
