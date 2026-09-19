@@ -158,6 +158,12 @@ public class CppMethod {
     o.i().p("void OnOK() {").incIndent();
     o.i().p("Napi::Env env = Env();");
     o.i().p("Napi::HandleScope scope(env);");
+    if (returnType.generics.get(0).isPointer()) {
+      o.i().p("if (res == nullptr) {").incIndent();
+      o.i().p("deferred->Resolve(env.Null());");
+      o.i().p("return;").decIndent();
+      o.i().p("}");
+    }
     returnType.generics.get(0).outputWrap("res", "wrapped_result");
     o.i().p("deferred->Resolve(wrapped_result);");
     o.decIndent().i().p("}");
