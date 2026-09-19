@@ -70,6 +70,9 @@ public class SoulSifterModelType extends CppType {
       o.i().p(fullName() + " " + to + "(Napi::ObjectWrap<" + name + ">::Unwrap(" + from + ".As<Napi::Object>())->getWrappedValue());");
     } else {
       o.i().p(fullName(true) + "* " + to + "tmp(Napi::ObjectWrap<" + name + ">::Unwrap(" + from + ".As<Napi::Object>())->getWrappedValue());");
+      o.i().p("if (" + to + "tmp == nullptr) {").incIndent();
+      mt.errOut("Object cannot be null or undefined (for " + to + ")");
+      o.decIndent().i().p("}");
       o.i().p(fullName(true) + "& " + to + " = *" + to + "tmp;");
     }
   }
